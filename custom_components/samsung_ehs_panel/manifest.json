@@ -1,14 +1,14 @@
 {
-  "domain": "samsung_ehs_panel",
+  "domain": "ehs_sentinel_panel",
   "name": "Samsung EHS Panel",
   "codeowners": ["@DEIN-GITHUB-NAME"],
   "config_flow": true,
   "dependencies": ["frontend", "http"],
   "after_dependencies": ["ehs_sentinel"],
-  "documentation": "https://github.com/DEIN-GITHUB-NAME/samsung-ehs-panel",
+  "documentation": "https://github.com/DEIN-GITHUB-NAME/ehs-sentinel-panel",
   "integration_type": "service",
   "iot_class": "calculated",
-  "issue_tracker": "https://github.com/DEIN-GITHUB-NAME/samsung-ehs-panel/issues",
+  "issue_tracker": "https://github.com/DEIN-GITHUB-NAME/ehs-sentinel-panel/issues",
   "requirements": [],
-  "version": "1.1.1"
+  "version": "1.1.3"
 }
