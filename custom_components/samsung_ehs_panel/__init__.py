@@ -4,7 +4,7 @@ from __future__ import annotations
 import logging
 from pathlib import Path
 
-from homeassistant.components import frontend
+from homeassistant.components import frontend, persistent_notification
 from homeassistant.components.http import StaticPathConfig
 from homeassistant.config_entries import ConfigEntry
 from homeassistant.core import HomeAssistant
@@ -33,6 +33,20 @@ WWW_DIR = Path(__file__).parent / "www"
 async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
     """Panel-Datei bereitstellen und Seitenleisten-Eintrag anlegen."""
     data = hass.data.setdefault(DOMAIN, {})
+
+    # Selbsttest: fehlt die Panel-Datei, zeigt HA sonst nur „404: Not Found“
+    panel_file = WWW_DIR / PANEL_FILE
+    if not await hass.async_add_executor_job(panel_file.is_file):
+        msg = (
+            f"Die Panel-Datei fehlt: `{panel_file}`.\n\n"
+            "Bitte prüfen, ob im GitHub-Repository der Ordner "
+            "`custom_components/samsung_ehs_panel/www/` mit `samsung-ehs-hmi800.html` vorhanden ist, "
+            "und die Integration in HACS erneut herunterladen."
+        )
+        _LOGGER.error(msg)
+        persistent_notification.async_create(hass, msg, title="Samsung EHS Panel", notification_id=f"{DOMAIN}_missing")
+    else:
+        persistent_notification.async_dismiss(hass, f"{DOMAIN}_missing")
 
     # Statischer Pfad lässt sich nicht wieder abmelden → nur einmal pro HA-Start registrieren
     if not data.get("static_registered"):

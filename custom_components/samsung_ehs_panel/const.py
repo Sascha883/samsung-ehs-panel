@@ -1,7 +1,7 @@
 """Konstanten für das Samsung EHS Panel."""
 
 DOMAIN = "samsung_ehs_panel"
-VERSION = "1.1.0"
+VERSION = "1.1.1"
 
 PANEL_FILE = "samsung-ehs-hmi800.html"
 STATIC_URL = f"/{DOMAIN}"
