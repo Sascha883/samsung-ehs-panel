@@ -8,7 +8,7 @@
           "sidebar_title": "Titel in der Seitenleiste",
           "sidebar_icon": "Symbol",
           "require_admin": "Nur für Administratoren",
-          "show_manager": "Verwaltungsseite „EHS Sentinel“ anzeigen (Admins)"
+          "show_manager": "Verwaltungsseite „EHS Panel“ anzeigen (Admins)"
         }
       }
     },
@@ -24,7 +24,7 @@
           "sidebar_title": "Titel in der Seitenleiste",
           "sidebar_icon": "Symbol",
           "require_admin": "Nur für Administratoren",
-          "show_manager": "Verwaltungsseite „EHS Sentinel“ anzeigen (Admins)"
+          "show_manager": "Verwaltungsseite „EHS Panel“ anzeigen (Admins)"
         }
       }
     }

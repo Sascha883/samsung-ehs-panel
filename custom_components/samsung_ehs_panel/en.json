@@ -8,7 +8,7 @@
           "sidebar_title": "Sidebar title",
           "sidebar_icon": "Icon",
           "require_admin": "Admins only",
-          "show_manager": "Show “EHS Sentinel” management page (admins)"
+          "show_manager": "Show “EHS Panel” management page (admins)"
         }
       }
     },
@@ -24,7 +24,7 @@
           "sidebar_title": "Sidebar title",
           "sidebar_icon": "Icon",
           "require_admin": "Admins only",
-          "show_manager": "Show “EHS Sentinel” management page (admins)"
+          "show_manager": "Show “EHS Panel” management page (admins)"
         }
       }
     }

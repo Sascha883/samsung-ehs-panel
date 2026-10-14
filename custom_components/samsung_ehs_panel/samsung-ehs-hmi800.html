@@ -375,7 +375,7 @@ const ENTITY_OVERRIDES = Object.assign({}, SAMSUNG_MAP, {
 const INSTALLER = { name:"Sascha Matheis Haustechnik", addr:"Segelbreite 27, 34314 Espenau", tel:"" };
 const HEATING_CIRCUITS = [1,2,3,4];  // werden nur angezeigt, wenn thermostat_hcX_* existiert
 const SERVICE_PIN = "";               // leer = Servicemenü ohne PIN, z.B. "1234"
-const PANEL_VERSION = "1.2.1";   // bei jeder neuen Version erhöhen (Upload im EMS-ESP Manager)
+const PANEL_VERSION = "1.3.1";   // bei jeder neuen Version erhöhen (Upload im EMS-ESP Manager)
 
 // Vom EMS-ESP Manager beim Ausliefern gesetzt (nicht von Hand eintragen)
 const MGR = window.EMS_ESP_MANAGER || null;
@@ -399,16 +399,17 @@ let settings = Object.assign({ advanced:false, brightness:100, saver:0, lock:fal
 function saveSettings(){ LS.set('settings',settings); applyDisplay(); }
 let userMap = Object.assign({}, ENTITY_OVERRIDES, LS.get('map',{}));
 // Zuordnung / Heizkreisnamen: mit Manager in Home Assistant, sonst im Browser
+const PSTORE = SAM_MODE ? 'samsung_ehs_panel/panel/' : 'ems_esp_manager/panel/';
 function mgrSave(data){
-  if(!MGR || !conn.ready || !conn.msg) return Promise.resolve(false);
-  return conn.msg(Object.assign({type:'ems_esp_manager/panel/save'}, data)).then(()=>true)
-    .catch(e=>{ toast('Nicht in HA gespeichert: '+((e&&e.message)||e)); return false; });
+  if(!(MGR||SAM_MODE) || !conn.ready || !conn.msg) return Promise.resolve(false);
+  return conn.msg(Object.assign({type:PSTORE+'save'}, data)).then(()=>true)
+    .catch(e=>{ if(!(e&&e.code==='unknown_command')) toast('Nicht in HA gespeichert: '+((e&&e.message)||e)); return false; });
 }
 function saveMap(m){ LS.set('map', m); for(const k in resolved) delete resolved[k]; return mgrSave({map:m}); }
 async function loadMgr(){
-  if(!MGR || !conn.msg) return;
+  if(!(MGR||SAM_MODE) || !conn.msg) return;
   try{
-    const r = await conn.msg({type:'ems_esp_manager/panel/get'});
+    const r = await conn.msg({type:PSTORE+'get'});
     // einmalige Übernahme: bisher nur im Browser gespeicherte Zuordnung/Namen nach HA
     const localMap = LS.get('map',{}), localHc = settings.hcNames||{};
     if(r.is_admin && !Object.keys(r.map||{}).length && Object.keys(localMap).length){ r.map = localMap; await mgrSave({map:localMap}); }
@@ -416,10 +417,10 @@ async function loadMgr(){
     userMap = Object.assign({}, ENTITY_OVERRIDES, r.map||{});
     LS.set('map', r.map||{});
     settings.hcNames = Object.assign({}, r.hc_names||{}); LS.set('settings',settings);
-    MGR.is_admin = !!r.is_admin;
+    if(MGR) MGR.is_admin = !!r.is_admin;
     for(const k in resolved) delete resolved[k];
     scheduleRender();
-  }catch(e){ toast('Zuordnung aus HA nicht geladen: '+((e&&e.message)||e)); }
+  }catch(e){ if(!(e&&e.code==='unknown_command')) toast('Zuordnung aus HA nicht geladen: '+((e&&e.message)||e)); }
 }
 
 /* =====================================================================

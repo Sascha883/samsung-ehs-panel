@@ -1,0 +1,1343 @@
+{
+ "version": "1.3.0",
+ "functions": [
+  {
+   "label": "Betriebsart (Auto/Heizen/Kühlen)",
+   "area": "Heizung",
+   "target": "select.samsung_ehssentinel_indooropmode",
+   "ids": [
+    "sensor.thermostat_hc1_hpoperatingstate",
+    "select.thermostat_hc1_hpoperatingmode",
+    "select.samsung_ehssentinel_indooropmode"
+   ]
+  },
+  {
+   "label": "Heizbetrieb bis (FSV 4013)",
+   "area": "Heizung",
+   "target": "number.samsung_ehssentinel_infsv4013",
+   "ids": [
+    "number.thermostat_hc1_summertemp",
+    "number.samsung_ehssentinel_infsv4013"
+   ]
+  },
+  {
+   "label": "Außentemp. kalt (2011)",
+   "area": "Heizung",
+   "target": "number.samsung_ehssentinel_infsv2011",
+   "ids": [
+    "number.samsung_ehssentinel_infsv2011"
+   ]
+  },
+  {
+   "label": "Außentemp. warm (2012)",
+   "area": "Heizung",
+   "target": "number.samsung_ehssentinel_infsv2012",
+   "ids": [
+    "number.samsung_ehssentinel_infsv2012"
+   ]
+  },
+  {
+   "label": "Vorlauf bei kalt WL1 (2021)",
+   "area": "Heizung",
+   "target": "number.samsung_ehssentinel_infsv2021",
+   "ids": [
+    "number.samsung_ehssentinel_infsv2021"
+   ]
+  },
+  {
+   "label": "Vorlauf bei warm WL1 (2022)",
+   "area": "Heizung",
+   "target": "number.samsung_ehssentinel_infsv2022",
+   "ids": [
+    "number.samsung_ehssentinel_infsv2022"
+   ]
+  },
+  {
+   "label": "Vorlauf bei kalt WL2 (2031)",
+   "area": "Heizung",
+   "target": "number.samsung_ehssentinel_infsv2031",
+   "ids": [
+    "number.samsung_ehssentinel_infsv2031"
+   ]
+  },
+  {
+   "label": "Vorlauf bei warm WL2 (2032)",
+   "area": "Heizung",
+   "target": "number.samsung_ehssentinel_infsv2032",
+   "ids": [
+    "number.samsung_ehssentinel_infsv2032"
+   ]
+  },
+  {
+   "label": "Heizkurven-Typ (2041)",
+   "area": "Heizung",
+   "target": "select.samsung_ehssentinel_infsv2041",
+   "ids": [
+    "select.samsung_ehssentinel_infsv2041",
+    "select.thermostat_hc1_heatingtype"
+   ]
+  },
+  {
+   "label": "Außentemp. max (2051)",
+   "area": "Heizung",
+   "target": "number.samsung_ehssentinel_infsv2051",
+   "ids": [
+    "number.samsung_ehssentinel_infsv2051"
+   ]
+  },
+  {
+   "label": "Außentemp. min (2052)",
+   "area": "Heizung",
+   "target": "number.samsung_ehssentinel_infsv2052",
+   "ids": [
+    "number.samsung_ehssentinel_infsv2052"
+   ]
+  },
+  {
+   "label": "Vorlauf WL1 max (2061)",
+   "area": "Heizung",
+   "target": "number.samsung_ehssentinel_infsv2061",
+   "ids": [
+    "number.samsung_ehssentinel_infsv2061"
+   ]
+  },
+  {
+   "label": "Vorlauf WL1 min (2062)",
+   "area": "Heizung",
+   "target": "number.samsung_ehssentinel_infsv2062",
+   "ids": [
+    "number.samsung_ehssentinel_infsv2062"
+   ]
+  },
+  {
+   "label": "Vorlauf WL2 max (2071)",
+   "area": "Heizung",
+   "target": "number.samsung_ehssentinel_infsv2071",
+   "ids": [
+    "number.samsung_ehssentinel_infsv2071"
+   ]
+  },
+  {
+   "label": "Vorlauf WL2 min (2072)",
+   "area": "Heizung",
+   "target": "number.samsung_ehssentinel_infsv2072",
+   "ids": [
+    "number.samsung_ehssentinel_infsv2072"
+   ]
+  },
+  {
+   "label": "Kühlkurven-Typ (2081)",
+   "area": "Heizung",
+   "target": "select.samsung_ehssentinel_infsv2081",
+   "ids": [
+    "select.samsung_ehssentinel_infsv2081"
+   ]
+  },
+  {
+   "label": "Ext. Thermostat WL1 (2091)",
+   "area": "Heizung",
+   "target": "select.samsung_ehssentinel_infsv2091",
+   "ids": [
+    "select.samsung_ehssentinel_infsv2091"
+   ]
+  },
+  {
+   "label": "Ext. Thermostat WL2 (2092)",
+   "area": "Heizung",
+   "target": "select.samsung_ehssentinel_infsv2092",
+   "ids": [
+    "select.samsung_ehssentinel_infsv2092"
+   ]
+  },
+  {
+   "label": "Vorrang Heizen/WW (4011)",
+   "area": "Heizung",
+   "target": "select.samsung_ehssentinel_infsv4011",
+   "ids": [
+    "select.samsung_ehssentinel_infsv4011"
+   ]
+  },
+  {
+   "label": "Außentemp. für Vorrang (4012)",
+   "area": "Heizung",
+   "target": "number.samsung_ehssentinel_infsv4012",
+   "ids": [
+    "number.samsung_ehssentinel_infsv4012"
+   ]
+  },
+  {
+   "label": "Anwendung (4021)",
+   "area": "Heizung",
+   "target": "select.samsung_ehssentinel_infsv4021",
+   "ids": [
+    "select.samsung_ehssentinel_infsv4021"
+   ]
+  },
+  {
+   "label": "BUH/BSH Vorrang (4022)",
+   "area": "Heizung",
+   "target": "select.samsung_ehssentinel_infsv4022",
+   "ids": [
+    "select.samsung_ehssentinel_infsv4022"
+   ]
+  },
+  {
+   "label": "Kaltwetter-Kompensation (4023)",
+   "area": "Heizung",
+   "target": "select.samsung_ehssentinel_infsv4023",
+   "ids": [
+    "select.samsung_ehssentinel_infsv4023"
+   ]
+  },
+  {
+   "label": "Schwelltemperatur (4024)",
+   "area": "Heizung",
+   "target": "number.samsung_ehssentinel_infsv4024",
+   "ids": [
+    "number.samsung_ehssentinel_infsv4024"
+   ]
+  },
+  {
+   "label": "Abtau-Backup Temp. (4025)",
+   "area": "Heizung",
+   "target": "number.samsung_ehssentinel_infsv4025",
+   "ids": [
+    "number.samsung_ehssentinel_infsv4025"
+   ]
+  },
+  {
+   "label": "Anwendung (4031)",
+   "area": "Heizung",
+   "target": "select.samsung_ehssentinel_infsv4031",
+   "ids": [
+    "select.samsung_ehssentinel_infsv4031"
+   ]
+  },
+  {
+   "label": "Kesselvorrang (4032)",
+   "area": "Heizung",
+   "target": "select.samsung_ehssentinel_infsv4032",
+   "ids": [
+    "select.samsung_ehssentinel_infsv4032"
+   ]
+  },
+  {
+   "label": "Schwelle (4033)",
+   "area": "Heizung",
+   "target": "number.samsung_ehssentinel_infsv4033",
+   "ids": [
+    "number.samsung_ehssentinel_infsv4033"
+   ]
+  },
+  {
+   "label": "Mischer (4041)",
+   "area": "Heizung",
+   "target": "select.samsung_ehssentinel_infsv4041",
+   "ids": [
+    "select.samsung_ehssentinel_infsv4041"
+   ]
+  },
+  {
+   "label": "ΔT Heizen (4042)",
+   "area": "Heizung",
+   "target": "number.samsung_ehssentinel_infsv4042",
+   "ids": [
+    "number.samsung_ehssentinel_infsv4042"
+   ]
+  },
+  {
+   "label": "ΔT Kühlen (4043)",
+   "area": "Heizung",
+   "target": "number.samsung_ehssentinel_infsv4043",
+   "ids": [
+    "number.samsung_ehssentinel_infsv4043"
+   ]
+  },
+  {
+   "label": "Regelfaktor (4044)",
+   "area": "Heizung",
+   "target": "select.samsung_ehssentinel_infsv4044",
+   "ids": [
+    "select.samsung_ehssentinel_infsv4044"
+   ]
+  },
+  {
+   "label": "Regelfaktor (4045)",
+   "area": "Heizung",
+   "target": "number.samsung_ehssentinel_infsv4045",
+   "ids": [
+    "number.samsung_ehssentinel_infsv4045"
+   ]
+  },
+  {
+   "label": "Laufzeit (4046)",
+   "area": "Heizung",
+   "target": "number.samsung_ehssentinel_infsv4046",
+   "ids": [
+    "number.samsung_ehssentinel_infsv4046"
+   ]
+  },
+  {
+   "label": "Inverter-Pumpe (4051)",
+   "area": "Heizung",
+   "target": "select.samsung_ehssentinel_infsv4051",
+   "ids": [
+    "select.samsung_ehssentinel_infsv4051"
+   ]
+  },
+  {
+   "label": "Pumpe ΔT (4052)",
+   "area": "Heizung",
+   "target": "number.samsung_ehssentinel_infsv4052",
+   "ids": [
+    "number.samsung_ehssentinel_infsv4052"
+   ]
+  },
+  {
+   "label": "Regelfaktor (4053)",
+   "area": "Heizung",
+   "target": "select.samsung_ehssentinel_infsv4053",
+   "ids": [
+    "select.samsung_ehssentinel_infsv4053"
+   ]
+  },
+  {
+   "label": "Zonenregelung (4061)",
+   "area": "Heizung",
+   "target": "select.samsung_ehssentinel_infsv4061",
+   "ids": [
+    "select.samsung_ehssentinel_infsv4061"
+   ]
+  },
+  {
+   "label": "Speicher-Solltemperatur",
+   "area": "Warmwasser",
+   "target": "number.samsung_ehssentinel_indoordhwsettemp",
+   "ids": [
+    "number.thermostat_dhw_settemp"
+   ]
+  },
+  {
+   "label": "Ladung aktiv (3-Wege-Ventil)",
+   "area": "Warmwasser",
+   "target": "sensor.samsung_ehssentinel_dhwvalve",
+   "ids": [
+    "binary_sensor.boiler_dhw_charging",
+    "binary_sensor.boiler_hpswitchvalve",
+    "sensor.samsung_ehssentinel_dhwvalve"
+   ]
+  },
+  {
+   "label": "Desinfektion aktiv (FSV 3041)",
+   "area": "Warmwasser",
+   "target": "switch.samsung_ehssentinel_infsv3041",
+   "ids": [
+    "switch.thermostat_dhw_disinfecting",
+    "switch.samsung_ehssentinel_infsv3041"
+   ]
+  },
+  {
+   "label": "Intervall (FSV 3042)",
+   "area": "Warmwasser",
+   "target": "select.samsung_ehssentinel_infsv3042",
+   "ids": [
+    "select.thermostat_dhw_disinfectday",
+    "select.samsung_ehssentinel_infsv3042"
+   ]
+  },
+  {
+   "label": "Startzeit (FSV 3043)",
+   "area": "Warmwasser",
+   "target": "number.samsung_ehssentinel_infsv3043",
+   "ids": [
+    "number.thermostat_dhw_disinfecttime",
+    "number.samsung_ehssentinel_infsv3043"
+   ]
+  },
+  {
+   "label": "Temperatur (FSV 3044)",
+   "area": "Warmwasser",
+   "target": "number.samsung_ehssentinel_infsv3044",
+   "ids": [
+    "number.boiler_dhw_disinfectiontemp",
+    "number.samsung_ehssentinel_infsv3044"
+   ]
+  },
+  {
+   "label": "WW-Anwendung (3011)",
+   "area": "Warmwasser",
+   "target": "select.samsung_ehssentinel_infsv3011",
+   "ids": [
+    "select.samsung_ehssentinel_infsv3011"
+   ]
+  },
+  {
+   "label": "WP max. Temperatur (3021)",
+   "area": "Warmwasser",
+   "target": "number.samsung_ehssentinel_infsv3021",
+   "ids": [
+    "number.samsung_ehssentinel_infsv3021"
+   ]
+  },
+  {
+   "label": "WP Stopp-Diff. (3022)",
+   "area": "Warmwasser",
+   "target": "number.samsung_ehssentinel_infsv3022",
+   "ids": [
+    "number.samsung_ehssentinel_infsv3022"
+   ]
+  },
+  {
+   "label": "WP Start-Diff. (3023)",
+   "area": "Warmwasser",
+   "target": "number.samsung_ehssentinel_infsv3023",
+   "ids": [
+    "number.samsung_ehssentinel_infsv3023"
+   ]
+  },
+  {
+   "label": "Min. Heizlaufzeit (3024)",
+   "area": "Warmwasser",
+   "target": "number.samsung_ehssentinel_infsv3024",
+   "ids": [
+    "number.samsung_ehssentinel_infsv3024"
+   ]
+  },
+  {
+   "label": "Max. WW-Laufzeit (3025)",
+   "area": "Warmwasser",
+   "target": "number.samsung_ehssentinel_infsv3025",
+   "ids": [
+    "number.samsung_ehssentinel_infsv3025"
+   ]
+  },
+  {
+   "label": "Max. Heizlaufzeit (3026)",
+   "area": "Warmwasser",
+   "target": "number.samsung_ehssentinel_infsv3026",
+   "ids": [
+    "number.samsung_ehssentinel_infsv3026"
+   ]
+  },
+  {
+   "label": "Verzögerung (3032)",
+   "area": "Warmwasser",
+   "target": "number.samsung_ehssentinel_infsv3032",
+   "ids": [
+    "number.samsung_ehssentinel_infsv3032"
+   ]
+  },
+  {
+   "label": "Dauer (3045)",
+   "area": "Warmwasser",
+   "target": "number.samsung_ehssentinel_infsv3045",
+   "ids": [
+    "number.samsung_ehssentinel_infsv3045"
+   ]
+  },
+  {
+   "label": "Max. Zeit (3046)",
+   "area": "Warmwasser",
+   "target": "number.samsung_ehssentinel_infsv3046",
+   "ids": [
+    "number.samsung_ehssentinel_infsv3046"
+   ]
+  },
+  {
+   "label": "Zeitbegrenzung (3051)",
+   "area": "Warmwasser",
+   "target": "select.samsung_ehssentinel_infsv3051",
+   "ids": [
+    "select.samsung_ehssentinel_infsv3051"
+   ]
+  },
+  {
+   "label": "Dauer (3052)",
+   "area": "Warmwasser",
+   "target": "number.samsung_ehssentinel_infsv3052",
+   "ids": [
+    "number.samsung_ehssentinel_infsv3052",
+    "number.thermostat_dhw_chargeduration"
+   ]
+  },
+  {
+   "label": "Solar / Thermostat (3061)",
+   "area": "Warmwasser",
+   "target": "select.samsung_ehssentinel_infsv3061",
+   "ids": [
+    "select.samsung_ehssentinel_infsv3061"
+   ]
+  },
+  {
+   "label": "3-Wege-Ventil Richtung (3071)",
+   "area": "Warmwasser",
+   "target": "select.samsung_ehssentinel_infsv3071",
+   "ids": [
+    "select.samsung_ehssentinel_infsv3071"
+   ]
+  },
+  {
+   "label": "BUH Stufe 1 Leistung (3081)",
+   "area": "Warmwasser",
+   "target": "number.samsung_ehssentinel_infsv3081",
+   "ids": [
+    "number.samsung_ehssentinel_infsv3081"
+   ]
+  },
+  {
+   "label": "BUH Stufe 2 Leistung (3082)",
+   "area": "Warmwasser",
+   "target": "number.samsung_ehssentinel_infsv3082",
+   "ids": [
+    "number.samsung_ehssentinel_infsv3082"
+   ]
+  },
+  {
+   "label": "BSH Leistung (3083)",
+   "area": "Warmwasser",
+   "target": "number.samsung_ehssentinel_infsv3083",
+   "ids": [
+    "number.samsung_ehssentinel_infsv3083"
+   ]
+  },
+  {
+   "label": "Status Außengerät",
+   "area": "Wärmepumpe",
+   "target": "sensor.samsung_ehssentinel_outdooroperationstatus",
+   "ids": [
+    "sensor.boiler_hpactivity",
+    "sensor.samsung_ehssentinel_outdooroperationstatus"
+   ]
+  },
+  {
+   "label": "Kompressor",
+   "area": "Wärmepumpe",
+   "target": "binary_sensor.samsung_ehssentinel_outdoorcomp1status",
+   "ids": [
+    "binary_sensor.boiler_hpcompon"
+   ]
+  },
+  {
+   "label": "Verdichterfrequenz",
+   "area": "Wärmepumpe",
+   "target": "sensor.samsung_ehssentinel_outdoorcomp1runhz",
+   "ids": [
+    "sensor.boiler_hpcompspd",
+    "sensor.samsung_ehssentinel_outdoorcomp1runhz"
+   ]
+  },
+  {
+   "label": "Verdichter Zielfrequenz",
+   "area": "Wärmepumpe",
+   "target": "sensor.samsung_ehssentinel_outdoorcomp1targethz",
+   "ids": [
+    "sensor.boiler_hptargetspd",
+    "sensor.samsung_ehssentinel_outdoorcomp1targethz"
+   ]
+  },
+  {
+   "label": "Elektr. Leistungsaufnahme",
+   "area": "Wärmepumpe",
+   "target": "sensor.samsung_ehssentinel_outdoorcontrolwattmeterallunit",
+   "ids": [
+    "sensor.boiler_hpcurrpower",
+    "sensor.samsung_ehssentinel_outdoorcontrolwattmeterallunit"
+   ]
+  },
+  {
+   "label": "Heizleistung",
+   "area": "Wärmepumpe",
+   "target": "sensor.samsung_ehssentinel_ehssentinelheatoutput",
+   "ids": [
+    "sensor.boiler_hppower",
+    "sensor.samsung_ehssentinel_ehssentinelheatoutput"
+   ]
+  },
+  {
+   "label": "TW2 Vorlauf WP",
+   "area": "Wärmepumpe",
+   "target": "sensor.samsung_ehssentinel_outdoortw2temp",
+   "ids": [
+    "sensor.boiler_hptc1",
+    "sensor.samsung_ehssentinel_outdoortw2temp"
+   ]
+  },
+  {
+   "label": "TW1 Rücklauf WP",
+   "area": "Wärmepumpe",
+   "target": "sensor.samsung_ehssentinel_outdoortw1temp",
+   "ids": [
+    "sensor.boiler_hptc0",
+    "sensor.samsung_ehssentinel_outdoortw1temp"
+   ]
+  },
+  {
+   "label": "Kondensationstemperatur",
+   "area": "Wärmepumpe",
+   "target": "sensor.samsung_ehssentinel_outdoorhighpresstemp",
+   "ids": [
+    "sensor.boiler_hptc3",
+    "sensor.samsung_ehssentinel_outdoorhighpresstemp",
+    "sensor.boiler_hpph1"
+   ]
+  },
+  {
+   "label": "Außenluft",
+   "area": "Wärmepumpe",
+   "target": "sensor.samsung_ehssentinel_outdoorouttemp",
+   "ids": [
+    "sensor.boiler_hptl2",
+    "sensor.boiler_outdoortemp"
+   ]
+  },
+  {
+   "label": "Heizungspumpe",
+   "area": "Wärmepumpe",
+   "target": "sensor.samsung_ehssentinel_inwaterpumppwmvalue",
+   "ids": [
+    "sensor.boiler_hpcircspd",
+    "sensor.samsung_ehssentinel_inwaterpumppwmvalue"
+   ]
+  },
+  {
+   "label": "Durchfluss",
+   "area": "Wärmepumpe",
+   "target": "sensor.samsung_ehssentinel_inflowsensorcalc",
+   "ids": [
+    "sensor.boiler_pc0flow",
+    "sensor.samsung_ehssentinel_inflowsensorcalc"
+   ]
+  },
+  {
+   "label": "Ventilator",
+   "area": "Wärmepumpe",
+   "target": "sensor.samsung_ehssentinel_outdoorfanrpm1",
+   "ids": [
+    "sensor.boiler_fanspd",
+    "sensor.samsung_ehssentinel_outdoorfanrpm1"
+   ]
+  },
+  {
+   "label": "4-Wege-Ventil (Abtauen)",
+   "area": "Wärmepumpe",
+   "target": "binary_sensor.samsung_ehssentinel_outdoor4wayvalve",
+   "ids": [
+    "binary_sensor.boiler_hp4way",
+    "binary_sensor.samsung_ehssentinel_outdoor4wayvalve"
+   ]
+  },
+  {
+   "label": "Vorlauf Innengerät",
+   "area": "Wärmepumpe",
+   "target": "sensor.samsung_ehssentinel_indoorwaterouttemp",
+   "ids": [
+    "sensor.samsung_ehssentinel_indoorwaterouttemp",
+    "sensor.boiler_curflowtemp"
+   ]
+  },
+  {
+   "label": "Rücklauf Innengerät",
+   "area": "Wärmepumpe",
+   "target": "sensor.samsung_ehssentinel_indoorwaterintemp",
+   "ids": [
+    "sensor.samsung_ehssentinel_indoorwaterintemp",
+    "sensor.boiler_rettemp"
+   ]
+  },
+  {
+   "label": "Speichertemperatur",
+   "area": "Wärmepumpe",
+   "target": "sensor.samsung_ehssentinel_indoordhwcurrenttemp",
+   "ids": [
+    "sensor.samsung_ehssentinel_indoordhwcurrenttemp",
+    "sensor.boiler_dhw_curtemp"
+   ]
+  },
+  {
+   "label": "Heißgas (Discharge)",
+   "area": "Wärmepumpe",
+   "target": "sensor.samsung_ehssentinel_outdoordischargetemp1",
+   "ids": [
+    "sensor.samsung_ehssentinel_outdoordischargetemp1",
+    "sensor.boiler_hptr6"
+   ]
+  },
+  {
+   "label": "Sauggas",
+   "area": "Wärmepumpe",
+   "target": "sensor.samsung_ehssentinel_outdoorsuction1temp",
+   "ids": [
+    "sensor.samsung_ehssentinel_outdoorsuction1temp",
+    "sensor.boiler_hptr5"
+   ]
+  },
+  {
+   "label": "Sauggas-Überhitzung",
+   "area": "Wärmepumpe",
+   "target": "sensor.samsung_ehssentinel_outdoorsuctionoverheat",
+   "ids": [
+    "sensor.samsung_ehssentinel_outdoorsuctionoverheat"
+   ]
+  },
+  {
+   "label": "Hochdruck",
+   "area": "Wärmepumpe",
+   "target": "sensor.samsung_ehssentinel_outdoorhighpress",
+   "ids": [
+    "sensor.samsung_ehssentinel_outdoorhighpress"
+   ]
+  },
+  {
+   "label": "Niederdruck",
+   "area": "Wärmepumpe",
+   "target": "sensor.samsung_ehssentinel_outdoorlowpress",
+   "ids": [
+    "sensor.samsung_ehssentinel_outdoorlowpress"
+   ]
+  },
+  {
+   "label": "Niederdruck Sättigungstemp.",
+   "area": "Wärmepumpe",
+   "target": "sensor.samsung_ehssentinel_outdoorlowpresstemp",
+   "ids": [
+    "sensor.samsung_ehssentinel_outdoorlowpresstemp",
+    "sensor.boiler_hppl1"
+   ]
+  },
+  {
+   "label": "Verdampfereintritt",
+   "area": "Wärmepumpe",
+   "target": "sensor.samsung_ehssentinel_outdoorevain",
+   "ids": [
+    "sensor.samsung_ehssentinel_outdoorevain",
+    "sensor.boiler_hptr4"
+   ]
+  },
+  {
+   "label": "Expansionsventil (EEV)",
+   "area": "Wärmepumpe",
+   "target": "sensor.samsung_ehssentinel_outdoormaineev1",
+   "ids": [
+    "sensor.samsung_ehssentinel_outdoormaineev1",
+    "sensor.boiler_expvalve"
+   ]
+  },
+  {
+   "label": "Abtauung",
+   "area": "Wärmepumpe",
+   "target": "sensor.samsung_ehssentinel_outdoordefroststep",
+   "ids": [
+    "sensor.samsung_ehssentinel_outdoordefroststep"
+   ]
+  },
+  {
+   "label": "COP aktuell",
+   "area": "Wärmepumpe",
+   "target": "sensor.samsung_ehssentinel_ehssentinelcop",
+   "ids": [
+    "sensor.samsung_ehssentinel_ehssentinelcop"
+   ]
+  },
+  {
+   "label": "Backup-Heizer",
+   "area": "Wärmepumpe",
+   "target": "sensor.samsung_ehssentinel_inbackupheater",
+   "ids": [
+    "sensor.samsung_ehssentinel_inbackupheater",
+    "sensor.boiler_auxheaterstatus"
+   ]
+  },
+  {
+   "label": "Booster-Heizstab",
+   "area": "Wärmepumpe",
+   "target": "binary_sensor.samsung_ehssentinel_inboosterheater",
+   "ids": [
+    "binary_sensor.samsung_ehssentinel_inboosterheater"
+   ]
+  },
+  {
+   "label": "Wärmepumpe",
+   "area": "Wärmepumpe",
+   "target": "select.samsung_ehssentinel_power",
+   "ids": [
+    "select.samsung_ehssentinel_power",
+    "select.thermostat_hc1_mode"
+   ]
+  },
+  {
+   "label": "Flüstermodus",
+   "area": "Wärmepumpe",
+   "target": "switch.samsung_ehssentinel_controlsilence",
+   "ids": [
+    "switch.samsung_ehssentinel_controlsilence"
+   ]
+  },
+  {
+   "label": "Abwesenheit (Outing)",
+   "area": "Wärmepumpe",
+   "target": "switch.samsung_ehssentinel_indooroutgoing",
+   "ids": [
+    "switch.samsung_ehssentinel_indooroutgoing",
+    "switch.thermostat_absent"
+   ]
+  },
+  {
+   "label": "Zone 2",
+   "area": "Wärmepumpe",
+   "target": "select.samsung_ehssentinel_powerzone2",
+   "ids": [
+    "select.samsung_ehssentinel_powerzone2"
+   ]
+  },
+  {
+   "label": "Zone 2 Vorlauf-Soll",
+   "area": "Wärmepumpe",
+   "target": "number.samsung_ehssentinel_intempwateroutlettargetzone2f",
+   "ids": [
+    "number.samsung_ehssentinel_intempwateroutlettargetzone2f"
+   ]
+  },
+  {
+   "label": "Frequenz-Vorgabe",
+   "area": "Wärmepumpe",
+   "target": "number.samsung_ehssentinel_outdoorcomp1orderhz",
+   "ids": [
+    "number.samsung_ehssentinel_outdoorcomp1orderhz"
+   ]
+  },
+  {
+   "label": "Leistungsbegrenzung (FSV 5051)",
+   "area": "Wärmepumpe",
+   "target": "select.samsung_ehssentinel_outcompfreqratecontrol",
+   "ids": [
+    "select.samsung_ehssentinel_outcompfreqratecontrol"
+   ]
+  },
+  {
+   "label": "Abtauvorgänge",
+   "area": "Wärmepumpe",
+   "target": "sensor.samsung_ehssentinel_ehssentineldefrostcounter",
+   "ids": [
+    "sensor.samsung_ehssentinel_ehssentineldefrostcounter"
+   ]
+  },
+  {
+   "label": "Vorlauf max. (1031)",
+   "area": "Grenzwerte",
+   "target": "number.samsung_ehssentinel_infsv1031",
+   "ids": [
+    "number.samsung_ehssentinel_infsv1031"
+   ]
+  },
+  {
+   "label": "Vorlauf min. (1032)",
+   "area": "Grenzwerte",
+   "target": "number.samsung_ehssentinel_infsv1032",
+   "ids": [
+    "number.samsung_ehssentinel_infsv1032",
+    "number.thermostat_hc1_hpminflowtemp"
+   ]
+  },
+  {
+   "label": "Raum max. (1041)",
+   "area": "Grenzwerte",
+   "target": "number.samsung_ehssentinel_infsv1041",
+   "ids": [
+    "number.samsung_ehssentinel_infsv1041"
+   ]
+  },
+  {
+   "label": "Raum min. (1042)",
+   "area": "Grenzwerte",
+   "target": "number.samsung_ehssentinel_infsv1042",
+   "ids": [
+    "number.samsung_ehssentinel_infsv1042"
+   ]
+  },
+  {
+   "label": "Speicher max. (1051)",
+   "area": "Grenzwerte",
+   "target": "number.samsung_ehssentinel_infsv1051",
+   "ids": [
+    "number.samsung_ehssentinel_infsv1051",
+    "number.boiler_dhw_maxtemp"
+   ]
+  },
+  {
+   "label": "Speicher min. (1052)",
+   "area": "Grenzwerte",
+   "target": "number.samsung_ehssentinel_infsv1052",
+   "ids": [
+    "number.samsung_ehssentinel_infsv1052"
+   ]
+  },
+  {
+   "label": "Vorlauf max. (1011)",
+   "area": "Grenzwerte",
+   "target": "number.samsung_ehssentinel_infsv1011",
+   "ids": [
+    "number.samsung_ehssentinel_infsv1011"
+   ]
+  },
+  {
+   "label": "Vorlauf min. (1012)",
+   "area": "Grenzwerte",
+   "target": "number.samsung_ehssentinel_infsv1012",
+   "ids": [
+    "number.samsung_ehssentinel_infsv1012"
+   ]
+  },
+  {
+   "label": "Raum max. (1021)",
+   "area": "Grenzwerte",
+   "target": "number.samsung_ehssentinel_infsv1021",
+   "ids": [
+    "number.samsung_ehssentinel_infsv1021"
+   ]
+  },
+  {
+   "label": "Raum min. (1022)",
+   "area": "Grenzwerte",
+   "target": "number.samsung_ehssentinel_infsv1022",
+   "ids": [
+    "number.samsung_ehssentinel_infsv1022"
+   ]
+  },
+  {
+   "label": "Erhöhung beim Heizen (FSV 5083)",
+   "area": "PV & Smart Grid",
+   "target": "number.samsung_ehssentinel_infsv5083",
+   "ids": [
+    "number.thermostat_pvraiseheat",
+    "number.samsung_ehssentinel_infsv5083"
+   ]
+  },
+  {
+   "label": "Absenkung beim Kühlen (FSV 5082)",
+   "area": "PV & Smart Grid",
+   "target": "number.samsung_ehssentinel_infsv5082",
+   "ids": [
+    "number.thermostat_pvlowercool",
+    "number.samsung_ehssentinel_infsv5082"
+   ]
+  },
+  {
+   "label": "Vorlauf Heizen (5013)",
+   "area": "PV & Smart Grid",
+   "target": "number.samsung_ehssentinel_infsv5013",
+   "ids": [
+    "number.samsung_ehssentinel_infsv5013"
+   ]
+  },
+  {
+   "label": "Raum Heizen (5014)",
+   "area": "PV & Smart Grid",
+   "target": "number.samsung_ehssentinel_infsv5014",
+   "ids": [
+    "number.samsung_ehssentinel_infsv5014"
+   ]
+  },
+  {
+   "label": "Auto Heizen WL1 (5017)",
+   "area": "PV & Smart Grid",
+   "target": "number.samsung_ehssentinel_infsv5017",
+   "ids": [
+    "number.samsung_ehssentinel_infsv5017"
+   ]
+  },
+  {
+   "label": "Auto Heizen WL2 (5018)",
+   "area": "PV & Smart Grid",
+   "target": "number.samsung_ehssentinel_infsv5018",
+   "ids": [
+    "number.samsung_ehssentinel_infsv5018"
+   ]
+  },
+  {
+   "label": "Speicher (5019)",
+   "area": "PV & Smart Grid",
+   "target": "number.samsung_ehssentinel_infsv5019",
+   "ids": [
+    "number.samsung_ehssentinel_infsv5019"
+   ]
+  },
+  {
+   "label": "Vorlauf Kühlen (5011)",
+   "area": "PV & Smart Grid",
+   "target": "number.samsung_ehssentinel_infsv5011",
+   "ids": [
+    "number.samsung_ehssentinel_infsv5011"
+   ]
+  },
+  {
+   "label": "Raum Kühlen (5012)",
+   "area": "PV & Smart Grid",
+   "target": "number.samsung_ehssentinel_infsv5012",
+   "ids": [
+    "number.samsung_ehssentinel_infsv5012"
+   ]
+  },
+  {
+   "label": "Sparbetrieb (5022)",
+   "area": "PV & Smart Grid",
+   "target": "switch.samsung_ehssentinel_infsv5022",
+   "ids": [
+    "switch.samsung_ehssentinel_infsv5022"
+   ]
+  },
+  {
+   "label": "Spartemperatur (5021)",
+   "area": "PV & Smart Grid",
+   "target": "number.samsung_ehssentinel_infsv5021",
+   "ids": [
+    "number.samsung_ehssentinel_infsv5021"
+   ]
+  },
+  {
+   "label": "Thermo-on Temp. (5023)",
+   "area": "PV & Smart Grid",
+   "target": "number.samsung_ehssentinel_infsv5023",
+   "ids": [
+    "number.samsung_ehssentinel_infsv5023"
+   ]
+  },
+  {
+   "label": "Leistungsspitzen-Steuerung (5041)",
+   "area": "PV & Smart Grid",
+   "target": "select.samsung_ehssentinel_infsv5041",
+   "ids": [
+    "select.samsung_ehssentinel_infsv5041"
+   ]
+  },
+  {
+   "label": "Zwangsabschaltung (5042)",
+   "area": "PV & Smart Grid",
+   "target": "select.samsung_ehssentinel_infsv5042",
+   "ids": [
+    "select.samsung_ehssentinel_infsv5042"
+   ]
+  },
+  {
+   "label": "Eingangsspannung (5043)",
+   "area": "PV & Smart Grid",
+   "target": "select.samsung_ehssentinel_infsv5043",
+   "ids": [
+    "select.samsung_ehssentinel_infsv5043"
+   ]
+  },
+  {
+   "label": "Frequenzverhältnis (5051)",
+   "area": "PV & Smart Grid",
+   "target": "select.samsung_ehssentinel_infsv5051",
+   "ids": [
+    "select.samsung_ehssentinel_infsv5051"
+   ]
+  },
+  {
+   "label": "WW/Heizen-Verhältnis (5061)",
+   "area": "PV & Smart Grid",
+   "target": "select.samsung_ehssentinel_infsv5061",
+   "ids": [
+    "select.samsung_ehssentinel_infsv5061"
+   ]
+  },
+  {
+   "label": "PV-Steuerung (5081)",
+   "area": "PV & Smart Grid",
+   "target": "select.samsung_ehssentinel_infsv5081",
+   "ids": [
+    "select.samsung_ehssentinel_infsv5081"
+   ]
+  },
+  {
+   "label": "Smart Grid (5091)",
+   "area": "PV & Smart Grid",
+   "target": "select.samsung_ehssentinel_infsv5091",
+   "ids": [
+    "select.samsung_ehssentinel_infsv5091"
+   ]
+  },
+  {
+   "label": "Anhebung Heizen (5092)",
+   "area": "PV & Smart Grid",
+   "target": "number.samsung_ehssentinel_infsv5092",
+   "ids": [
+    "number.samsung_ehssentinel_infsv5092"
+   ]
+  },
+  {
+   "label": "Anhebung WW (5093)",
+   "area": "PV & Smart Grid",
+   "target": "number.samsung_ehssentinel_infsv5093",
+   "ids": [
+    "number.samsung_ehssentinel_infsv5093"
+   ]
+  },
+  {
+   "label": "WW-Modus (5094)",
+   "area": "PV & Smart Grid",
+   "target": "select.samsung_ehssentinel_infsv5094",
+   "ids": [
+    "select.samsung_ehssentinel_infsv5094"
+   ]
+  },
+  {
+   "label": "Strom verbraucht",
+   "area": "Energie & Statistik",
+   "target": "sensor.samsung_ehssentinel_ehssentineldailyconsumedpower",
+   "ids": [
+    "sensor.samsung_ehssentinel_ehssentineldailyconsumedpower"
+   ]
+  },
+  {
+   "label": "Wärme erzeugt",
+   "area": "Energie & Statistik",
+   "target": "sensor.samsung_ehssentinel_ehssentineldailygeneratedpower",
+   "ids": [
+    "sensor.samsung_ehssentinel_ehssentineldailygeneratedpower"
+   ]
+  },
+  {
+   "label": "Arbeitszahl",
+   "area": "Energie & Statistik",
+   "target": "sensor.samsung_ehssentinel_ehssentineldailycop",
+   "ids": [
+    "sensor.samsung_ehssentinel_ehssentineldailycop"
+   ]
+  },
+  {
+   "label": "Arbeitszahl Heizen",
+   "area": "Energie & Statistik",
+   "target": "sensor.samsung_ehssentinel_ehssentineldailycopheatmode",
+   "ids": [
+    "sensor.samsung_ehssentinel_ehssentineldailycopheatmode"
+   ]
+  },
+  {
+   "label": "Arbeitszahl Warmwasser",
+   "area": "Energie & Statistik",
+   "target": "sensor.samsung_ehssentinel_ehssentineldailycopdhwmode",
+   "ids": [
+    "sensor.samsung_ehssentinel_ehssentineldailycopdhwmode"
+   ]
+  },
+  {
+   "label": "Laufzeit",
+   "area": "Energie & Statistik",
+   "target": "sensor.samsung_ehssentinel_ehssentineldailyminutesactive",
+   "ids": [
+    "sensor.samsung_ehssentinel_ehssentineldailyminutesactive"
+   ]
+  },
+  {
+   "label": "Strom Außengerät",
+   "area": "Energie & Statistik",
+   "target": "sensor.samsung_ehssentinel_outdoorcontrolwattmeterallunitaccum",
+   "ids": [
+    "sensor.samsung_ehssentinel_outdoorcontrolwattmeterallunitaccum",
+    "sensor.boiler_nrgconstotal",
+    "sensor.boiler_nrgconscomptotal"
+   ]
+  },
+  {
+   "label": "Wärme erzeugt",
+   "area": "Energie & Statistik",
+   "target": "sensor.samsung_ehssentinel_intotalgeneratedpower",
+   "ids": [
+    "sensor.samsung_ehssentinel_intotalgeneratedpower",
+    "sensor.boiler_nrgsupptotal"
+   ]
+  },
+  {
+   "label": "Arbeitszahl gesamt",
+   "area": "Energie & Statistik",
+   "target": "sensor.samsung_ehssentinel_ehssentineltotalcop",
+   "ids": [
+    "sensor.samsung_ehssentinel_ehssentineltotalcop"
+   ]
+  },
+  {
+   "label": "Strom",
+   "area": "Energie & Statistik",
+   "target": "sensor.samsung_ehssentinel_ehssentineltotalconsumedpowerheatmode",
+   "ids": [
+    "sensor.samsung_ehssentinel_ehssentineltotalconsumedpowerheatmode",
+    "sensor.boiler_nrgconscompheating"
+   ]
+  },
+  {
+   "label": "Wärme",
+   "area": "Energie & Statistik",
+   "target": "sensor.samsung_ehssentinel_ehssentineltotalgeneratedpowerheatmode",
+   "ids": [
+    "sensor.samsung_ehssentinel_ehssentineltotalgeneratedpowerheatmode",
+    "sensor.boiler_nrgsuppheating"
+   ]
+  },
+  {
+   "label": "Arbeitszahl",
+   "area": "Energie & Statistik",
+   "target": "sensor.samsung_ehssentinel_ehssentineltotalcopheatmode",
+   "ids": [
+    "sensor.samsung_ehssentinel_ehssentineltotalcopheatmode"
+   ]
+  },
+  {
+   "label": "Laufzeit",
+   "area": "Energie & Statistik",
+   "target": "sensor.samsung_ehssentinel_ehssentineltotalminutesactiveheatmode",
+   "ids": [
+    "sensor.samsung_ehssentinel_ehssentineltotalminutesactiveheatmode",
+    "sensor.boiler_uptimecompheating"
+   ]
+  },
+  {
+   "label": "Strom",
+   "area": "Energie & Statistik",
+   "target": "sensor.samsung_ehssentinel_ehssentineltotalconsumedpowerdhwmode",
+   "ids": [
+    "sensor.samsung_ehssentinel_ehssentineltotalconsumedpowerdhwmode",
+    "sensor.boiler_dhw_nrgconscomp"
+   ]
+  },
+  {
+   "label": "Wärme",
+   "area": "Energie & Statistik",
+   "target": "sensor.samsung_ehssentinel_ehssentineltotalgeneratedpowerdhwmode",
+   "ids": [
+    "sensor.samsung_ehssentinel_ehssentineltotalgeneratedpowerdhwmode",
+    "sensor.boiler_dhw_nrgsupp"
+   ]
+  },
+  {
+   "label": "Arbeitszahl",
+   "area": "Energie & Statistik",
+   "target": "sensor.samsung_ehssentinel_ehssentineltotalcopdhwmode",
+   "ids": [
+    "sensor.samsung_ehssentinel_ehssentineltotalcopdhwmode"
+   ]
+  },
+  {
+   "label": "Laufzeit",
+   "area": "Energie & Statistik",
+   "target": "sensor.samsung_ehssentinel_ehssentineltotalminutesactivedhwmode",
+   "ids": [
+    "sensor.samsung_ehssentinel_ehssentineltotalminutesactivedhwmode",
+    "sensor.boiler_dhw_uptimecomp"
+   ]
+  },
+  {
+   "label": "Steuereinheit",
+   "area": "Energie & Statistik",
+   "target": "sensor.samsung_ehssentinel_inminutessinceinstallation",
+   "ids": [
+    "sensor.boiler_uptimetotal"
+   ]
+  },
+  {
+   "label": "Aktiv gesamt",
+   "area": "Energie & Statistik",
+   "target": "sensor.samsung_ehssentinel_inminutesactive",
+   "ids": [
+    "sensor.boiler_uptimecontrol"
+   ]
+  },
+  {
+   "label": "Total",
+   "area": "Energie & Statistik",
+   "target": "sensor.samsung_ehssentinel_ehssentinelstartcounter",
+   "ids": [
+    "sensor.boiler_totalcompstarts"
+   ]
+  },
+  {
+   "label": "Aktueller Fehlercode",
+   "area": "Störungen",
+   "target": "sensor.samsung_ehssentinel_errorcode1",
+   "ids": [
+    "sensor.thermostat_errorcode"
+   ]
+  },
+  {
+   "label": "Fehlercode Außengerät",
+   "area": "Störungen",
+   "target": "sensor.samsung_ehssentinel_outerrorcode",
+   "ids": [
+    "sensor.samsung_ehssentinel_outerrorcode",
+    "sensor.boiler_lastcode"
+   ]
+  },
+  {
+   "label": "Fehlercode 2",
+   "area": "Störungen",
+   "target": "sensor.samsung_ehssentinel_errorcode2",
+   "ids": [
+    "sensor.samsung_ehssentinel_errorcode2"
+   ]
+  },
+  {
+   "label": "Fehlercode 3",
+   "area": "Störungen",
+   "target": "sensor.samsung_ehssentinel_errorcode3",
+   "ids": [
+    "sensor.samsung_ehssentinel_errorcode3"
+   ]
+  },
+  {
+   "label": "Fehlercode 4",
+   "area": "Störungen",
+   "target": "sensor.samsung_ehssentinel_errorcode4",
+   "ids": [
+    "sensor.samsung_ehssentinel_errorcode4"
+   ]
+  },
+  {
+   "label": "Fehlercode 5",
+   "area": "Störungen",
+   "target": "sensor.samsung_ehssentinel_errorcode5",
+   "ids": [
+    "sensor.samsung_ehssentinel_errorcode5"
+   ]
+  },
+  {
+   "label": "Verschiebung Heizkurve",
+   "area": "Heizung",
+   "target": "number.samsung_ehssentinel_intempwaterlawtargetf",
+   "ids": [
+    "number.thermostat_hc1_seltemp"
+   ]
+  },
+  {
+   "label": "Vorlauf-Soll",
+   "area": "Heizung",
+   "target": "sensor.samsung_ehssentinel_ehssentinelcurrenttargetflowtemp",
+   "ids": [
+    "sensor.thermostat_hc1_targetflowtemp"
+   ]
+  },
+  {
+   "label": "Raumtemperatur",
+   "area": "Heizung",
+   "target": "sensor.samsung_ehssentinel_currenttemp",
+   "ids": [
+    "sensor.thermostat_hc1_currtemp"
+   ]
+  },
+  {
+   "label": "Warmwasser-Modus",
+   "area": "Warmwasser",
+   "target": "select.samsung_ehssentinel_dhwopmode",
+   "ids": [
+    "select.thermostat_dhw_mode"
+   ]
+  },
+  {
+   "label": "Warmwasser freigegeben",
+   "area": "Warmwasser",
+   "target": "switch.samsung_ehssentinel_dhwpower",
+   "ids": [
+    "switch.boiler_dhw_activated"
+   ]
+  }
+ ]
+}

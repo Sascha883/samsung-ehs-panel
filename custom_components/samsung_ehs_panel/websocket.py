@@ -10,8 +10,16 @@ from typing import Any
 import voluptuous as vol
 
 from homeassistant.components import websocket_api
-from homeassistant.core import HomeAssistant
+from homeassistant.core import HomeAssistant, callback
+from homeassistant.helpers import entity_registry as er
+from homeassistant.helpers.storage import Store
 from homeassistant.loader import async_get_integration
+
+try:
+    from homeassistant.const import EVENT_STATE_CHANGED, EVENT_STATE_REPORTED
+except ImportError:  # sehr alte HA-Versionen
+    from homeassistant.const import EVENT_STATE_CHANGED
+    EVENT_STATE_REPORTED = None
 
 from .const import DOMAIN, VERSION, WS_PREFIX
 
@@ -265,7 +273,162 @@ async def ws_test_connection(hass: HomeAssistant, connection, msg) -> None:
         connection.send_result(msg["id"], {"ok": False, "error": str(err) or err.__class__.__name__})
 
 
+# ---------------- Zuordnung des Panels in Home Assistant speichern (wie EMS-ESP Manager) ----------------
+def _store(hass: HomeAssistant) -> Store:
+    data = hass.data.setdefault(DOMAIN, {})
+    if "store" not in data:
+        data["store"] = Store(hass, 1, f"{DOMAIN}.panel")
+    return data["store"]
+
+
+async def _store_load(hass: HomeAssistant) -> dict:
+    data = hass.data.setdefault(DOMAIN, {})
+    if "store_data" not in data:
+        data["store_data"] = (await _store(hass).async_load()) or {"map": {}, "hc_names": {}}
+    return data["store_data"]
+
+
+@websocket_api.websocket_command({vol.Required("type"): f"{WS_PREFIX}/panel/get"})
+@websocket_api.async_response
+async def ws_panel_get(hass: HomeAssistant, connection, msg) -> None:
+    d = await _store_load(hass)
+    connection.send_result(
+        msg["id"], {"map": d.get("map", {}), "hc_names": d.get("hc_names", {}), "is_admin": connection.user.is_admin}
+    )
+
+
+@websocket_api.websocket_command(
+    {vol.Required("type"): f"{WS_PREFIX}/panel/save", vol.Optional("map"): dict, vol.Optional("hc_names"): dict}
+)
+@websocket_api.require_admin
+@websocket_api.async_response
+async def ws_panel_save(hass: HomeAssistant, connection, msg) -> None:
+    d = await _store_load(hass)
+    if "map" in msg:
+        d["map"] = {str(k): str(v) for k, v in msg["map"].items() if v}
+    if "hc_names" in msg:
+        d["hc_names"] = {str(k): str(v) for k, v in msg["hc_names"].items() if v}
+    await _store(hass).async_save(d)
+    connection.send_result(msg["id"], {"ok": True})
+
+
+# ---------------- Werte prüfen: alle Werte direkt bei der Wärmepumpe anfragen ----------------
+def _norm(name: str) -> str:
+    for p in ("ENUM_", "LVAR_", "NASA_", "VAR_"):
+        if name.startswith(p):
+            name = name[len(p):]
+            break
+    parts = name.split("_")
+    return (parts[0].lower() + "".join(x.capitalize() for x in parts[1:])).lower()
+
+
+def _load_nasa_keys(path: str) -> dict:
+    import yaml  # in HA immer vorhanden
+
+    with open(path, "r", encoding="utf-8") as fh:
+        repo = yaml.safe_load(fh) or {}
+    return {_norm(k): k for k, v in repo.items() if isinstance(v, dict) and "address" in v}
+
+
+async def _nasa_map(hass: HomeAssistant) -> dict:
+    data = hass.data.setdefault(DOMAIN, {})
+    if "nasa_map" not in data:
+        path = hass.config.path("custom_components", EHS_DOMAIN, "data", "nasa_repository.yml")
+        try:
+            data["nasa_map"] = await hass.async_add_executor_job(_load_nasa_keys, path)
+        except Exception:  # pylint: disable=broad-except
+            data["nasa_map"] = {}
+    return data["nasa_map"]
+
+
+@websocket_api.websocket_command(
+    {
+        vol.Required("type"): f"{WS_PREFIX}/verify",
+        vol.Required("entity_ids"): [str],
+        vol.Optional("entry_id"): str,
+        vol.Optional("timeout", default=20): vol.All(int, vol.Range(min=5, max=90)),
+    }
+)
+@websocket_api.require_admin
+@websocket_api.async_response
+async def ws_verify(hass: HomeAssistant, connection, msg) -> None:
+    """Fragt die Werte bei der WP an (nur lesen) und meldet, welche Entitäten eine Antwort erhalten."""
+    coords = hass.data.get(EHS_DOMAIN, {}) or {}
+    ent_reg = er.async_get(hass)
+    nasa = await _nasa_map(hass)
+    if not nasa:
+        connection.send_error(msg["id"], "no_repo", "NASA-Liste von EHS Sentinel nicht gefunden")
+        return
+
+    by_entry: dict[str, dict[str, str]] = {}
+    no_key: list[str] = []
+    for eid in msg["entity_ids"]:
+        reg = ent_reg.async_get(eid)
+        if reg is None or reg.platform != EHS_DOMAIN:
+            no_key.append(eid)
+            continue
+        uid = reg.unique_id or ""
+        entry_id = reg.config_entry_id or ""
+        if entry_id and uid.startswith(entry_id + "_"):
+            k = uid[len(entry_id) + 1:]
+        elif uid.startswith("samsung_ehssentinel"):
+            k = uid[len("samsung_ehssentinel"):]
+        else:
+            k = uid.split("_", 1)[-1]
+        key = nasa.get(k.lower())
+        if not key or entry_id not in coords:
+            no_key.append(eid)
+            continue
+        by_entry.setdefault(entry_id, {})[eid] = key
+
+    targets = {eid for m in by_entry.values() for eid in m}
+    answered: set[str] = set()
+    done = asyncio.Event()
+
+    @callback
+    def _flt(event_data) -> bool:
+        return event_data.get("entity_id") in targets
+
+    @callback
+    def _got(event) -> None:
+        answered.add(event.data.get("entity_id"))
+        if answered >= targets:
+            done.set()
+
+    unsubs = [hass.bus.async_listen(EVENT_STATE_CHANGED, _got, event_filter=_flt)]
+    if EVENT_STATE_REPORTED:
+        unsubs.append(hass.bus.async_listen(EVENT_STATE_REPORTED, _got, event_filter=_flt))
+    buf = _buffer(hass)
+    if buf:
+        buf.add_marker(f"Werte prüfen: {len(targets)} Werte werden angefragt")
+    errors = []
+    try:
+        for entry_id, m in by_entry.items():
+            keys = sorted(set(m.values()))
+            ok = await coords[entry_id].producer.read_request(list_of_messages=keys, retry_mode=False)
+            if ok is False:
+                errors.append("Adressen von Innen-/Außengerät noch nicht erkannt – bitte kurz warten.")
+        if targets:
+            try:
+                await asyncio.wait_for(done.wait(), timeout=msg["timeout"])
+            except asyncio.TimeoutError:
+                pass
+    finally:
+        for u in unsubs:
+            u()
+    connection.send_result(
+        msg["id"],
+        {
+            "requested": len(targets),
+            "answered": sorted(answered & targets),
+            "missing": sorted(targets - answered),
+            "no_key": sorted(no_key),
+            "errors": errors,
+        },
+    )
+
+
 def async_register(hass: HomeAssistant) -> None:
     for cmd in (ws_status, ws_logs, ws_log_level, ws_clear, ws_diagnostics, ws_reconnect, ws_packet_log,
-                ws_config_get, ws_config_set, ws_test_connection):
+                ws_config_get, ws_config_set, ws_test_connection, ws_panel_get, ws_panel_save, ws_verify):
         websocket_api.async_register_command(hass, cmd)

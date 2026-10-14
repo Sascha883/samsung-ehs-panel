@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
-<title>EHS Sentinel – Verwaltung</title>
+<title>EHS Panel – Verwaltung</title>
 <style>
 /* Farben werden beim Start aus dem Home-Assistant-Theme übernommen (Fallback: dunkel) */
 :root{
@@ -88,6 +88,62 @@ details summary{cursor:pointer;color:var(--dim);font-size:13.5px}
 .etbl tr.unav td.v{color:var(--dim)}
 .etbl tr.flash td{background:color-mix(in srgb,var(--acc) 12%,transparent);transition:background .6s}
 .ewrap{max-height:calc(100vh - 230px);overflow:auto}
+.mapw{max-width:980px;margin:0 auto}
+.mtop{display:flex;gap:12px;align-items:center;margin:0 0 16px}
+.mtop input{flex:1;max-width:420px;font:inherit;color:var(--txt);background:var(--card);border:1px solid var(--line);border-radius:8px;padding:9px 12px}
+.mtop span{color:var(--dim);font-size:13.5px}
+.mas{columns:3 380px;column-gap:20px}
+.mas .card{break-inside:avoid;margin:0 0 20px;display:block}
+.mas h3{font-size:22px;font-weight:400;margin:0;padding:18px 18px 10px}
+.mr{display:flex;align-items:center;gap:16px;padding:8px 18px;min-height:48px}
+.mr .ico{width:22px;height:22px;color:color-mix(in srgb,var(--acc) 70%,var(--dim));flex:none}
+.mr .ico.on{color:#fdd835}
+.mr .nm{flex:1;min-width:0;font-size:14.5px}
+.mr .nm small{display:block;color:var(--dim);font-size:11.5px;word-break:break-all}
+.mr .vl{text-align:right;font-variant-numeric:tabular-nums;white-space:nowrap;font-size:14.5px;max-width:55%;overflow:hidden;text-overflow:ellipsis}
+.mr.unav .vl,.mr.unav .nm{color:var(--dim)}
+.nbox{display:flex;align-items:center;background:var(--card2);border-bottom:1px solid var(--dim);border-radius:4px 4px 0 0;min-width:96px}
+.nbox input{width:72px;background:transparent;border:0;color:var(--txt);font:inherit;text-align:right;padding:12px 4px 12px 10px}
+.nbox span{color:var(--txt);padding-right:12px;font-size:14px}
+.sbox{flex:1;min-width:0;background:var(--card2);border-bottom:1px solid var(--dim);border-radius:4px 4px 0 0;padding:6px 12px 4px}
+.sbox label{display:block;font-size:11.5px;color:var(--dim)}
+.sbox select{width:100%;background:transparent;border:0;color:var(--txt);font:inherit;padding:2px 0 4px;appearance:auto}
+.sbox select option{background:var(--card);color:var(--txt)}
+.mapw h1{font-size:24px;font-weight:400;text-align:center;margin:4px 0 14px}
+.mapw .bar{height:3px;border-radius:2px;background:var(--acc);margin-bottom:18px}
+.sum{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-bottom:14px}
+.sum button{font:inherit;background:var(--card);border:1px solid var(--line);border-radius:var(--r);padding:14px 8px;cursor:pointer;color:var(--dim);text-align:center}
+.sum button b{display:block;font-size:34px;font-weight:400;line-height:1.15;color:var(--txt)}
+.sum button.g b{color:var(--ok)}.sum button.m b{color:var(--err)}.sum button.x b{color:var(--dim)}
+.sum button.on{border-color:var(--acc);background:color-mix(in srgb,var(--acc) 14%,var(--card));color:var(--txt)}
+.vcard{display:flex;align-items:center;gap:16px;padding:16px 20px}
+.vcard .tx{flex:1;min-width:0}.vcard .tx b{display:block;font-size:20px;font-weight:400;margin-bottom:2px}.vcard .tx span{color:var(--dim)}
+.vcard .res{margin-top:6px;font-size:14px}
+.btn.big{font-size:16px;padding:10px 24px;border-radius:8px}
+.msearch{width:100%;font:inherit;font-size:17px;color:var(--txt);background:var(--card);border:1px solid var(--line);border-radius:var(--r);padding:13px 18px;margin:14px 0}
+.sect{color:var(--dim);font-size:14px;letter-spacing:.06em;text-transform:uppercase;margin:6px 12px 4px}
+.alist .ar{display:flex;align-items:center;gap:12px;padding:12px;border-bottom:1px solid var(--line);cursor:pointer}
+.alist .ar:hover{background:var(--card)}
+.alist .ar .tx{flex:1;min-width:0}.alist .ar .tx b{display:block;font-size:20px;font-weight:400}.alist .ar .tx span{color:var(--dim);font-size:15px}
+.badge{min-width:30px;text-align:center;padding:2px 9px;border-radius:12px;font-size:14px;background:color-mix(in srgb,var(--err) 22%,transparent);color:var(--err)}
+.badge.w{background:color-mix(in srgb,var(--warn) 22%,transparent);color:var(--warn)}
+.chev{color:var(--dim);font-size:24px;line-height:1}
+.back{background:none;border:0;color:var(--acc);font:inherit;cursor:pointer;padding:6px 0;margin-bottom:6px}
+.fr{display:grid;grid-template-columns:minmax(0,1fr) auto 150px auto;gap:12px;align-items:center;padding:10px 12px;border-bottom:1px solid var(--line)}
+.fr .tx b{display:block;font-weight:400;font-size:16px}
+.fr .tx small{display:block;color:var(--dim);font-size:12px;font-family:ui-monospace,Menlo,Consolas,monospace;word-break:break-all}
+.fr .val{text-align:right;white-space:nowrap;font-variant-numeric:tabular-nums}
+.fr .st{display:flex;gap:6px;align-items:center;justify-content:flex-end;flex-wrap:wrap}
+.fr .c input[type=number],.fr .c select{padding:5px 8px;font-size:13.5px;width:100%}
+.fr .lnk{background:none;border:1px solid var(--line);color:var(--acc);border-radius:14px;font:inherit;font-size:13px;padding:3px 10px;cursor:pointer;white-space:nowrap}
+.vm{font-size:12px;padding:1px 7px;border-radius:9px}
+.vm.y{background:color-mix(in srgb,var(--ok) 18%,transparent);color:var(--ok)}.vm.n{background:color-mix(in srgb,var(--warn) 20%,transparent);color:var(--warn)}
+.expl{color:var(--dim);font-size:15px;line-height:1.6;padding:12px}
+.expl b{color:var(--txt);font-weight:500}
+.pk2{display:flex;justify-content:space-between;gap:12px;padding:10px 12px;border-bottom:1px solid var(--line);cursor:pointer}
+.pk2:hover{background:var(--card2)}
+.pk2 small{display:block;color:var(--dim);font-family:ui-monospace,Menlo,Consolas,monospace;font-size:12px;word-break:break-all}
+@media (max-width:760px){.sum{grid-template-columns:repeat(2,1fr)}.fr{grid-template-columns:minmax(0,1fr) auto}.fr .c,.fr .val{grid-column:1/-1;text-align:left}.vcard{flex-wrap:wrap}}
 .tag{font-size:11.5px;padding:1px 7px;border-radius:9px;background:var(--card2);color:var(--dim);white-space:nowrap}
 .tag.w{background:color-mix(in srgb,var(--acc) 18%,transparent);color:var(--acc)}
 @media (max-width:760px){.etbl td.d,.etbl th.d,.etbl td.t,.etbl th.t{display:none}.etbl td.c{width:118px}.etbl td{padding:7px 8px}.etool .chip{font-size:12px;padding:3px 9px}}
@@ -122,7 +178,7 @@ details summary{cursor:pointer;color:var(--dim);font-size:13.5px}
 <div class="dlg" id="dlg" role="dialog" aria-modal="true" aria-labelledby="dlgT"><div class="box"><h3 id="dlgT"></h3><p id="dlgP"></p>
   <div class="bb"><button class="btn" id="dlgN">Abbrechen</button><button class="btn pri" id="dlgY">OK</button></div></div></div>
 <script>
-/* EHS Sentinel – Verwaltung · Teil der Integration „Samsung EHS Panel“ */
+/* EHS Panel – Verwaltung · Teil der Integration „Samsung EHS Panel“ */
 const WS = 'samsung_ehs_panel/';
 const $ = s => document.querySelector(s);
 const esc = s => String(s ?? '').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
@@ -163,6 +219,8 @@ function errText(e){ const c=e&&e.code, m=(e&&e.message)||String(e||'Fehler');
 /* ---------- Zustand ---------- */
 const st = { tab:(()=>{ try{ return sessionStorage.getItem('ehsm_tab')||'over'; }catch(e){ return 'over'; } })(),
              ent:{q:'', f:'all'},
+             map:{view:'areas', area:null, f:'all', q:'', pick:null, pq:'', verify:null, verifying:false},
+             cat:null, pmap:{}, pmapAdmin:true,
              status:null, err:null, sel:null, cfg:null, cfgFor:null, form:null, cfgMsg:null, busy:false,
              log:{tab:'log', level:'all', data:null, err:null, pause:false, file:null} };
 
@@ -215,7 +273,7 @@ function updCard(label, u, installed){
 
 function render(){
   A.length = 0;
-  if(!hass){ $('#app').innerHTML = `<div class="fatal">Diese Seite funktioniert nur innerhalb von Home Assistant (Seitenleiste „EHS Sentinel“).</div>`; return; }
+  if(!hass){ $('#app').innerHTML = `<div class="fatal">Diese Seite funktioniert nur innerhalb von Home Assistant (Seitenleiste „EHS Panel“).</div>`; return; }
   if(st.err && !st.status){ $('#app').innerHTML = `<div class="fatal">${esc(st.err)}</div>`; return; }
   if(!st.status){ $('#app').innerHTML = `<div class="fatal">Lade …</div>`; return; }
   const S = st.status, inst = S.instances.find(x=>x.entry_id===st.sel), U = updates();
@@ -310,8 +368,9 @@ function render(){
 
   const ents = ehsEntities();
   const tabBtn = (k,ic,l,cnt) => `<button class="${st.tab===k?'on':''}" data-a="${act(()=>setTab(k))}">${IC[ic]}${l}${cnt!=null?`<span class="cnt">${cnt}</span>`:''}</button>`;
-  const tabs = `<div class="tabs" role="tablist">${tabBtn('over','info','Übersicht')}${tabBtn('ent','chip','Entitäten',ents.length)}${tabBtn('log','list','Protokoll')}</div>`;
-  const body = st.tab==='ent' ? entHtml(ents) : st.tab==='log' ? log : `<div class="grid">${c1}${c2}${c3}</div>`;
+  const nSet = ents.filter(e=>EDIT[e.dom]).length, nMes = ents.length - nSet;
+  const tabs = `<div class="tabs" role="tablist">${tabBtn('over','info','Übersicht')}${tabBtn('set','chip','Einstellungen',nSet)}${tabBtn('mes','pulse','Messwerte',nMes)}${tabBtn('ent','link','Zuordnung',st.cat?st.cat.length:null)}${tabBtn('log','list','Protokoll')}</div>`;
+  const body = st.tab==='set' ? cardsHtml(ents,'set') : st.tab==='mes' ? cardsHtml(ents,'mes') : st.tab==='ent' ? (st.map.view==='raw' ? `<button class="back" data-a="${act(()=>{ st.map.view='areas'; render(); })}">‹ Entitäten-Zuordnung</button>`+entHtml(ents) : mapHtml(ents)) : st.tab==='log' ? log : `<div class="grid">${c1}${c2}${c3}</div>`;
   const lbOld = $('#lbody'), scroll = lbOld ? lbOld.scrollTop : 0;
   const ewOld = $('#ewrap'), escroll = ewOld ? ewOld.scrollTop : 0;
   const focus = document.activeElement && document.activeElement.dataset ? document.activeElement.dataset.k : null;
@@ -322,7 +381,8 @@ function render(){
   bind();
 }
 function bind(){
-  if(st.tab==='ent') entBind();
+  if(st.tab==='ent'){ entBind(); mapBind(); }
+  if(st.tab==='set'||st.tab==='mes') cardsBind();
   document.querySelectorAll('[data-a]').forEach(el=>el.addEventListener('click',ev=>{ ev.preventDefault(); const f=A[+el.dataset.a]; if(f) f(); }));
   document.querySelectorAll('#cfg [data-k]').forEach(el=>{
     const upd = () => { st.form[el.dataset.k] = el.type==='checkbox' ? el.checked : el.type==='number' ? (el.value===''?'':+el.value) : el.value; };
@@ -415,6 +475,189 @@ function entBind(){
   });
 }
 
+/* ---------- Einstellungen / Messwerte (wie EMS-ESP Manager) ---------- */
+const MI = {
+  therm:'<svg viewBox="0 0 24 24" fill="currentColor"><path d="M15 13V5a3 3 0 0 0-6 0v8a5 5 0 1 0 6 0zm-3-9a1 1 0 0 1 1 1v3h-2V5a1 1 0 0 1 1-1z"/></svg>',
+  bolt:'<svg viewBox="0 0 24 24" fill="currentColor"><path d="M7 2v11h3v9l7-12h-4l4-8z"/></svg>',
+  clock:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="12" cy="12" r="8.5" stroke-dasharray="3 2.2"/><path d="M12 7v5l3 2"/></svg>',
+  gauge:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M4 16a8 8 0 1 1 16 0"/><path d="M12 16l4-5"/></svg>',
+  eye:'<svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 5C6 5 2 12 2 12s4 7 10 7 10-7 10-7-4-7-10-7zm0 11a4 4 0 1 1 0-8 4 4 0 0 1 0 8zm0-6a2 2 0 1 0 0 4 2 2 0 0 0 0-4z"/></svg>',
+  circ:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="12" cy="12" r="8"/></svg>',
+  dot:'<svg viewBox="0 0 24 24" fill="currentColor"><circle cx="12" cy="12" r="8"/></svg>',
+  list:'<svg viewBox="0 0 24 24" fill="currentColor"><path d="M3 5h2v2H3zm4 0h14v2H7zM3 11h2v2H3zm4 0h14v2H7zm-4 6h2v2H3zm4 0h14v2H7z"/></svg>',
+  phone:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="7" y="3" width="10" height="18" rx="2"/><path d="M10 18h4"/></svg>',
+  slide:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M3 12h18"/><circle cx="12" cy="12" r="2.5" fill="currentColor"/></svg>',
+  wave:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M2 12c3-8 5-8 7 0s4 8 7 0 4-8 6-4"/></svg>',
+  flow:'<svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 3s-6 7-6 11a6 6 0 0 0 12 0c0-4-6-11-6-11z"/></svg>',
+};
+const objOf = id => (id.split('.')[1]||'').replace(/^.*?ehssentinel_/,'');
+function grpOf(e, kind){
+  const o = objOf(e.id);
+  if(kind==='set'){ const m=o.match(/^infsv(\d)/); return m ? ({1:'FSV 10xx · Grenzwerte',2:'FSV 20xx · Heizkurve',3:'FSV 30xx · Warmwasser',4:'FSV 40xx · Heizung & Zuheizer',5:'FSV 50xx · Sonstiges'})[m[1]]||'FSV' : 'Betrieb'; }
+  if(/^ehssentinel/.test(o)) return 'EHS Sentinel (berechnet)';
+  if(/^(outdoor|out)/.test(o)) return 'Außengerät';
+  if(/^(indoor|in|dhw|currenttemp|control|power|zone)/.test(o)) return 'Innengerät';
+  return 'Weitere';
+}
+const GORD = ['Betrieb','FSV 10xx · Grenzwerte','FSV 20xx · Heizkurve','FSV 30xx · Warmwasser','FSV 40xx · Heizung & Zuheizer','FSV 50xx · Sonstiges','FSV','Innengerät','Außengerät','EHS Sentinel (berechnet)','Weitere'];
+function labelOf(e){
+  const o = objOf(e.id);
+  if(st.cat){
+    if(!labelOf.dup){ labelOf.dup={}; st.cat.forEach(f=>labelOf.dup[f.label]=(labelOf.dup[f.label]||0)+1); }
+    const f = st.cat.find(f=>objOf(f.target)===o); if(f && labelOf.dup[f.label]===1) return f.label; }
+  const fsv = o.match(/^infsv(\d{4})$/); if(fsv) return 'FSV '+fsv[1];
+  const n = String(e.name).replace(/^.*?ehssentinel[ _]/i,'').replace(/([a-z])([A-Z0-9])/g,'$1 $2').replace(/_/g,' ');
+  return n.charAt(0).toUpperCase()+n.slice(1);
+}
+function icoOf(e){
+  const u = e.s.attributes.unit_of_measurement||'', o = objOf(e.id);
+  if(e.dom==='switch'||e.dom==='binary_sensor') return e.dom==='binary_sensor' ? (e.s.state==='on'?MI.dot:MI.circ) : MI.phone;
+  if(e.dom==='select') return MI.list;
+  if(/°C|K$/.test(u)) return MI.therm;
+  if(/W$|Wh$|kW|kWh/.test(u)) return MI.bolt;
+  if(/^(min|h|s|d)$/.test(u) || /minute|time|hour/i.test(o)) return MI.clock;
+  if(u==='%' ) return MI.gauge;
+  if(/l\/min|flow/i.test(u+o)) return MI.flow;
+  if(/hz|rpm/i.test(u)) return MI.wave;
+  if(e.dom==='number') return MI.slide;
+  return MI.eye;
+}
+const FSVU = { '°C':'1011 1012 1021 1022 1031 1032 1041 1042 1051 1052 2011 2012 2021 2022 2031 2032 2051 2052 2061 2062 2071 2072 3021 3044 4012 4013 4024 4025 5011 5012 5013 5014 5015 5016 5017 5018 5019 5021 5023',
+  'K':'3022 3023 4042 4043 4052 5082 5083 5092 5093', 'min':'3024 3025 3032 3045 3052', 'h':'3026 3043 3046', 'kW':'3081 3082 3083' };
+const FSVU_OF = {}; Object.entries(FSVU).forEach(([u,l])=>l.split(' ').forEach(n=>FSVU_OF['infsv'+n]=u));
+function setCtl(e, lbl){
+  const a=e.s.attributes, s=e.s.state, dis=s==='unavailable'?'disabled':'', u=a.unit_of_measurement||FSVU_OF[objOf(e.id)]||'';
+  if(e.dom==='number') return `<div class="nbox"><input type="number" data-eid="${esc(e.id)}" value="${esc(s)}" min="${esc(a.min??'')}" max="${esc(a.max??'')}" step="${esc(a.step??'any')}" ${dis} aria-label="${esc(lbl)}">${u?`<span>${esc(u)}</span>`:''}</div>`;
+  if(e.dom==='switch') return `<label class="sw"><input type="checkbox" data-eid="${esc(e.id)}" ${s==='on'?'checked':''} ${dis} aria-label="${esc(lbl)}"></label>`;
+  return '';
+}
+function cardsHtml(ents, kind){
+  const q = (st.cq||'').trim().toLowerCase();
+  const list = ents.filter(e => kind==='set' ? EDIT[e.dom] : !EDIT[e.dom]).map(e=>({e, l:labelOf(e), g:grpOf(e,kind)}))
+                   .filter(x => !q || (x.l+' '+x.e.id+' '+x.g).toLowerCase().includes(q));
+  const groups = {}; list.forEach(x=>(groups[x.g]=groups[x.g]||[]).push(x));
+  const keys = Object.keys(groups).sort((a,b)=>(GORD.indexOf(a)+1||99)-(GORD.indexOf(b)+1||99));
+  const wm = st.status && st.status.instances.find(x=>x.entry_id===st.sel);
+  const cards = keys.map(g=>`<div class="card"><h3>${esc(g)}</h3>${groups[g].sort((a,b)=>a.l.localeCompare(b.l,'de',{numeric:true})).map(({e,l})=>{
+      const unav = e.s.state==='unavailable';
+      if(kind==='set' && e.dom==='select') return `<div class="mr ${unav?'unav':''}"><span class="ico">${icoOf(e)}</span><div class="sbox"><label>${esc(l)}</label><select data-eid="${esc(e.id)}" ${unav?'disabled':''} aria-label="${esc(l)}">${(e.s.attributes.options||[]).map(o=>`<option value="${esc(o)}" ${o===e.s.state?'selected':''}>${esc(o)}</option>`).join('')}${(e.s.attributes.options||[]).includes(e.s.state)?'':`<option selected disabled>${esc(e.s.state)}</option>`}</select></div></div>`;
+      const right = kind==='set' ? setCtl(e,l) : `<span class="vl" title="${esc(valTxt(e))}">${esc(valTxt(e))}</span>`;
+      const on = e.dom==='switch' && e.s.state==='on';
+      return `<div class="mr ${unav?'unav':''}"><span class="ico ${on?'on':''}">${icoOf(e)}</span><span class="nm">${esc(l)}<small>${esc(e.id)}</small></span>${right}</div>`;
+    }).join('')}</div>`).join('');
+  return `<div class="mtop"><input type="search" id="cq" placeholder="${kind==='set'?'Einstellung':'Messwert'} suchen …" value="${esc(st.cq||'')}" aria-label="Suchen"><span>${list.length} ${kind==='set'?'Einstellungen':'Messwerte'}</span></div>
+    ${kind==='set' && wm && wm.write_mode===false ? `<div class="msg info" style="margin:0 0 16px">Schreibmodus ist aus – Einstellungen erscheinen dann nur unter Messwerte. Einschalten unter Übersicht → Schnittstelle.</div>`:''}
+    ${list.length ? `<div class="mas">${cards}</div>` : '<div class="empty">Nichts gefunden.</div>'}`;
+}
+function cardsBind(){
+  entBind();
+  const q=$('#cq'); if(q) q.addEventListener('input',()=>{ st.cq=q.value; clearTimeout(cardsBind._t); cardsBind._t=setTimeout(()=>{ render(); const n=$('#cq'); if(n){ n.focus(); n.setSelectionRange(n.value.length,n.value.length); } },250); });
+}
+
+/* ---------- Entitäten-Zuordnung (wie EMS-ESP Manager) ---------- */
+const BAD = v => v==null || v==='unavailable' || v==='unknown';
+const STL = {all:'Alle', found:'Gefunden', missing:'Fehlt in HA', nodata:'Nicht geliefert'};
+async function loadMapData(){
+  try{ const r = await fetch('ehs-functions.json?v='+Date.now()); st.cat = (await r.json()).functions || []; }catch(e){ st.cat = []; }
+  try{ const r = await send({type:WS+'panel/get'}); st.pmap = r.map||{}; st.pmapAdmin = !!r.is_admin; }
+  catch(e){ try{ st.pmap = JSON.parse(localStorage.getItem('ehs800.map')||'{}'); }catch(_){ st.pmap = {}; } }
+}
+function resolveT(t, ents){
+  const cur = hass.states[t]; if(cur && !BAD(cur.state)) return t;
+  const dom = t.split('.')[0], obj = (t.split('.')[1]||''), suf = 'ehssentinel_'+obj.replace(/^.*?ehssentinel_/,'');
+  const c = ents.filter(e=>{ const o=e.id.split('.')[1]; return o===suf || o.endsWith('_'+suf); });
+  c.sort((a,b)=>(BAD(a.s.state)-BAD(b.s.state)) || ((a.dom!==dom)-(b.dom!==dom)));
+  return c.length ? c[0].id : (cur ? t : null);
+}
+function fnInfo(f, ents){
+  const ov = f.ids.map(i=>st.pmap[i]).find(Boolean);
+  const t = ov || f.target, r = resolveT(t, ents), s = r && hass.states[r];
+  const status = !r ? 'missing' : BAD(s.state) ? 'nodata' : 'found';
+  const v = st.map.verify; const vm = !v || !r ? null : v.answered.has(r) ? 'y' : v.missing.has(r) ? 'n' : null;
+  return {f, t, r, s, status, over:!!ov, vm};
+}
+function mapHtml(ents){
+  if(!st.cat) return `<div class="empty">Lade Funktionsliste …</div>`;
+  const M = st.map, all = st.cat.map(f=>fnInfo(f, ents));
+  const cnt = k => k==='all' ? all.length : all.filter(x=>x.status===k).length;
+  const q = M.q.trim().toLowerCase();
+  const pass = x => (M.f==='all' || x.status===M.f) && (!q || (x.f.label+' '+(x.r||x.t)+' '+x.f.area).toLowerCase().includes(q));
+  const sumBtn = (k,cls) => `<button class="${cls} ${M.f===k?'on':''}" data-a="${act(()=>{ M.f=k; render(); })}"><b>${cnt(k)}</b>${STL[k]}</button>`;
+  const v = M.verify;
+  const vres = M.verifying ? `<div class="res" style="color:var(--dim)">Werte werden bei der Wärmepumpe angefragt … (bis zu 20 s)</div>`
+    : v ? `<div class="res"><span style="color:var(--ok)">✓ ${v.answered.size} antworten</span> · <span style="color:var(--warn)">✗ ${v.missing.size} ohne Antwort</span>${v.noKey?` · ${v.noKey} nicht anfragbar`:''} <span style="color:var(--dim)">(${v.time})</span>${v.errors.length?`<br><span style="color:var(--err)">${esc(v.errors.join(' '))}</span>`:''}</div>` : '';
+  let html = `<div class="mapw"><h1>Entitäten-Zuordnung</h1><div class="bar"></div>
+    <div class="sum">${sumBtn('all','')}${sumBtn('found','g')}${sumBtn('missing','m')}${sumBtn('nodata','x')}</div>
+    <div class="card vcard"><div class="tx"><b>Werte prüfen</b><span>Fragt alle Werte direkt bei der Wärmepumpe ab und prüft, ob Home Assistant sie erhält. Es wird nichts verändert.</span>${vres}</div>
+      <button class="btn pri big" data-a="${act(runVerify)}" ${M.verifying?'disabled':''}>${M.verifying?'Prüfe …':'Prüfen'}</button></div>`;
+  if(M.view==='pick') return html.replace('<h1>Entitäten-Zuordnung</h1><div class="bar"></div>','<h1>Zuordnen</h1><div class="bar"></div>').split('<div class="sum">')[0] + pickHtml(ents, all) + `</div>`;
+  if(M.view==='area' && !q){
+    const rows = all.filter(x=>x.f.area===M.area && pass(x));
+    html += `<button class="back" data-a="${act(()=>{ M.view='areas'; render(); })}">‹ Bereiche</button>
+      <div class="sect">${esc(M.area)} · ${esc(STL[M.f])}</div><div class="card">${rows.map(fnRow).join('') || '<div class="empty">Keine Funktionen in diesem Filter.</div>'}</div>`;
+  } else {
+    html += `<input type="search" class="msearch" id="mq" placeholder="Funktion oder Entität suchen …" value="${esc(M.q)}" aria-label="Funktion oder Entität suchen">`;
+    if(q){
+      const rows = all.filter(pass);
+      html += `<div class="sect">Treffer · ${rows.length}</div><div class="card">${rows.map(fnRow).join('') || '<div class="empty">Nichts gefunden.</div>'}</div>`;
+    } else {
+      const areas = [...new Set(st.cat.map(f=>f.area))];
+      const rows = areas.map(a=>{ const it = all.filter(x=>x.f.area===a); if(!it.some(pass)) return '';
+        const g=it.filter(x=>x.status==='found').length, m=it.filter(x=>x.status==='missing').length, n=it.filter(x=>x.status==='nodata').length;
+        const vn = v ? it.filter(x=>x.vm==='n').length : 0;
+        return `<div class="ar" data-a="${act(()=>{ M.view='area'; M.area=a; render(); })}" role="button" tabindex="0"><div class="tx"><b>${esc(a)}</b>
+          <span>${g} von ${it.length} gefunden${m?` · ${m} fehlt in HA`:''}${n?` · ${n} nicht geliefert`:''}${vn?` · ${vn} ohne Antwort`:''}</span></div>
+          ${m?`<span class="badge">${m}</span>`:vn?`<span class="badge w">${vn}</span>`:''}<span class="chev">›</span></div>`; }).join('');
+      html += `<div class="sect">Bereiche · ${esc(STL[M.f])}</div><div class="alist">${rows || '<div class="empty">Keine Bereiche in diesem Filter.</div>'}</div>`;
+    }
+  }
+  html += `<div class="expl"><b>Fehlt in HA</b> – das Panel nutzt die Funktion, aber Home Assistant hat keine passende Entität von EHS Sentinel. Antippen und zuordnen.<br>
+    <b>Nicht geliefert</b> – die Entität existiert, die Wärmepumpe liefert aber keinen Wert (z. B. Zone 2, Zubehör). Das Panel blendet sie aus, hier ist nichts zu tun.<br>
+    <b>Werte prüfen</b> – „ohne Antwort“ heißt: die WP hat auf die Anfrage nicht reagiert (Funktion bei diesem Modell nicht vorhanden oder Verbindung gestört).<br>
+    Eigene Zuordnungen werden in Home Assistant gespeichert und gelten für das Samsung-Panel in jedem Browser.</div>
+    <div style="text-align:center;margin:10px 0 20px"><button class="btn" data-a="${act(()=>{ M.view='raw'; render(); })}">Alle EHS-Sentinel-Entitäten anzeigen (${ents.length})</button></div></div>`;
+  return html;
+}
+function fnRow(x){
+  const e = x.r ? {id:x.r, s:x.s, dom:x.r.split('.')[0], name:x.f.label} : null;
+  const pill = x.status==='found' ? '<span class="pill ok">Gefunden</span>' : x.status==='missing' ? '<span class="pill no">Fehlt in HA</span>' : '<span class="pill dm" style="color:var(--dim);background:var(--card2)">Nicht geliefert</span>';
+  const vm = x.vm==='y' ? '<span class="vm y">✓ antwortet</span>' : x.vm==='n' ? '<span class="vm n">✗ keine Antwort</span>' : '';
+  return `<div class="fr"><div class="tx"><b>${esc(x.f.label)}</b><small>${x.r?esc(x.r):'keine Entität · erwartet '+esc(x.t)}${x.over?' · eigene Zuordnung':''}</small></div>
+    <div class="st">${pill}${vm}</div>
+    <div class="c">${e && x.status==='found' && EDIT[e.dom] ? ctrlHtml(e) : `<div class="val">${e?esc(valTxt(e)):'–'}</div>`}</div>
+    <button class="lnk" data-a="${act(()=>{ st.map.pick=x.f; st.map.pq=''; st.map.view='pick'; render(); })}">${x.status==='missing'?'Zuordnen':'Ändern'}</button></div>`;
+}
+function pickHtml(ents, all){
+  const M = st.map, f = M.pick, x = all.find(y=>y.f===f) || fnInfo(f, ents), q = M.pq.trim().toLowerCase();
+  const list = ents.filter(e=>!q || (e.name+' '+e.id).toLowerCase().includes(q)).slice(0,300);
+  return `<button class="back" data-a="${act(()=>{ M.view = M.area?'area':'areas'; render(); })}">‹ Zurück</button>
+    <div class="card pad"><b style="font-size:18px;font-weight:400">${esc(f.label)}</b><div style="color:var(--dim);font-size:13.5px;margin-top:4px">
+      Bereich: ${esc(f.area)} · Standard: <code>${esc(f.target)}</code><br>Aktuell: ${x.r?`<code>${esc(x.r)}</code>`:'keine Entität'}${x.over?' (eigene Zuordnung)':''}</div>
+      ${x.over?`<div style="margin-top:10px"><button class="btn" data-a="${act(()=>saveMapFor(f,null))}">Standard wiederherstellen</button></div>`:''}</div>
+    <input type="search" class="msearch" id="pq" placeholder="EHS-Sentinel-Entität suchen …" value="${esc(M.pq)}" aria-label="Entität suchen">
+    <div class="card">${list.map(e=>`<div class="pk2" data-a="${act(()=>saveMapFor(f,e.id))}" role="button" tabindex="0"><div>${esc(e.name)}<small>${esc(e.id)}</small></div><div class="val" style="white-space:nowrap">${esc(valTxt(e))}</div></div>`).join('') || '<div class="empty">Keine Entität gefunden.</div>'}</div>`;
+}
+async function saveMapFor(f, eid){
+  const m = {...st.pmap}; for(const id of f.ids){ if(eid) m[id]=eid; else delete m[id]; }
+  try{ await send({type:WS+'panel/save', map:m}); st.pmap = m; try{ localStorage.setItem('ehs800.map', JSON.stringify(m)); }catch(e){}
+       toast(eid ? 'Zugeordnet – gilt sofort im Samsung-Panel (Seite dort neu laden)' : 'Standard wiederhergestellt'); st.map.view = st.map.area?'area':'areas'; render(); }
+  catch(e){ toast(errText(e)); }
+}
+async function runVerify(){
+  const M = st.map, ents = ehsEntities(); if(!st.cat) return;
+  const ids = [...new Set(st.cat.map(f=>fnInfo(f, ents).r).filter(Boolean))];
+  M.verifying = true; render();
+  try{ const r = await send({type:WS+'verify', entity_ids:ids, entry_id:st.sel||undefined, timeout:20});
+       M.verify = {answered:new Set(r.answered), missing:new Set(r.missing), noKey:(r.no_key||[]).length, errors:r.errors||[], time:new Date().toLocaleTimeString('de-DE',{hour:'2-digit',minute:'2-digit'})}; }
+  catch(e){ toast(errText(e)); }
+  M.verifying = false; render();
+}
+function mapBind(){
+  const q = $('#mq'); if(q) q.addEventListener('input',()=>{ st.map.q=q.value; clearTimeout(mapBind._t); mapBind._t=setTimeout(()=>{ render(); const n=$('#mq'); if(n){ n.focus(); n.setSelectionRange(n.value.length,n.value.length); } },250); });
+  const p = $('#pq'); if(p) p.addEventListener('input',()=>{ st.map.pq=p.value; clearTimeout(mapBind._t); mapBind._t=setTimeout(()=>{ render(); const n=$('#pq'); if(n){ n.focus(); n.setSelectionRange(n.value.length,n.value.length); } },250); });
+  document.querySelectorAll('.ar[data-a],.pk2[data-a]').forEach(el=>el.addEventListener('keydown',ev=>{ if(ev.key==='Enter'||ev.key===' '){ ev.preventDefault(); el.click(); } }));
+}
+
 /* ---------- Aktionen ---------- */
 function openHA(path){ try{ window.parent.history.pushState(null,'',path); window.parent.dispatchEvent(new CustomEvent('location-changed')); }catch(e){ window.open(path,'_top'); } }
 async function testConn(){
@@ -456,17 +699,19 @@ document.addEventListener('keydown',e=>{ if(e.key==='Escape') $('#dlg').classLis
 /* ---------- Ablauf ---------- */
 async function refreshLog(){ await loadLog(); render(); }
 async function refreshAll(){ await loadStatus(); if(st.tab==='log') await loadLog(); render(); }
-function editing(){ const a=document.activeElement; return a && a.closest && a.closest('#cfg') && a.tagName!=='BUTTON'; }
+function editing(){ const a=document.activeElement; return !!a && ['INPUT','SELECT','TEXTAREA'].includes(a.tagName); }
 async function start(){
   for(let i=0;i<40 && !(hass=getHass()); i++) await new Promise(r=>setTimeout(r,150));
   applyTheme();
   if(!hass){ render(); return; }
+  await loadMapData();
   await refreshAll();
   setInterval(async()=>{ if(document.hidden) return; hass = getHass()||hass; await loadStatus();
-    if(st.tab==='ent'){ entLive(); return; }
+    if(st.tab==='ent'){ if(st.map.view==='raw') entLive(); else if(!editing()) render(); return; }
+    if(st.tab==='set'||st.tab==='mes'){ if(!editing()) render(); return; }
     if(st.tab==='log') await loadLog();
     if(!editing()) render(); }, 4000);
-  setInterval(()=>{ if(st.tab==='ent' && !document.hidden){ hass=getHass()||hass; entLive(); } }, 1500);
+  setInterval(()=>{ if(st.tab==='ent' && st.map.view==='raw' && !document.hidden){ hass=getHass()||hass; entLive(); } }, 1500);
 }
 start();
 </script>

@@ -4,7 +4,7 @@ from pathlib import Path
 # Domain = Ordnername (custom_components/<ordner>) – so passt es auch nach Umbenennen
 DOMAIN = Path(__file__).resolve().parent.name
 WS_PREFIX = "samsung_ehs_panel"  # WebSocket-Befehle (fest, das Panel ruft diese Namen auf)
-VERSION = "1.2.1"
+VERSION = "1.3.1"
 
 PANEL_FILE = "samsung-ehs-hmi800.html"
 STATIC_URL = f"/{DOMAIN}"

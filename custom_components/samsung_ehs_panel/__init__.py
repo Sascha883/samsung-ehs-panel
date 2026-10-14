@@ -94,7 +94,7 @@ async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
         frontend.async_register_built_in_panel(
             hass,
             component_name="iframe",
-            sidebar_title="EHS Sentinel",
+            sidebar_title="EHS Panel",
             sidebar_icon="mdi:lan-connect",
             frontend_url_path=MANAGER_URL_PATH,
             config={"url": f"{STATIC_URL}/{MANAGER_FILE}?v={VERSION}"},
