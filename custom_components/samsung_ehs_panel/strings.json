@@ -1,0 +1,30 @@
+{
+  "config": {
+    "step": {
+      "user": {
+        "title": "Samsung EHS Panel",
+        "description": "Adds the Samsung control unit (HMI 800 menu) to the sidebar. Requires the “EHS Sentinel” integration.",
+        "data": {
+          "sidebar_title": "Sidebar title",
+          "sidebar_icon": "Icon",
+          "require_admin": "Admins only"
+        }
+      }
+    },
+    "abort": {
+      "single_instance_allowed": "The panel is already set up."
+    }
+  },
+  "options": {
+    "step": {
+      "init": {
+        "title": "Panel settings",
+        "data": {
+          "sidebar_title": "Sidebar title",
+          "sidebar_icon": "Icon",
+          "require_admin": "Admins only"
+        }
+      }
+    }
+  }
+}
