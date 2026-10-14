@@ -376,6 +376,9 @@ async def ws_verify(hass: HomeAssistant, connection, msg) -> None:
         else:
             k = uid.split("_", 1)[-1]
         key = nasa.get(k.lower())
+        if not key:
+            st_obj = hass.states.get(eid)
+            key = st_obj.attributes.get("nasa_name") if st_obj else None
         if not key or entry_id not in coords:
             no_key.append(eid)
             continue
@@ -428,7 +431,69 @@ async def ws_verify(hass: HomeAssistant, connection, msg) -> None:
     )
 
 
+@websocket_api.websocket_command({vol.Required("type"): f"{WS_PREFIX}/verify_write", vol.Required("entity_id"): str})
+@websocket_api.require_admin
+@websocket_api.async_response
+async def ws_verify_write(hass: HomeAssistant, connection, msg) -> None:
+    """Schreibt den AKTUELLEN Wert erneut (nichts wird verändert) und wartet auf die Bestätigung der WP."""
+    eid = msg["entity_id"]
+    state = hass.states.get(eid)
+    dom = eid.split(".")[0]
+    if state is None or state.state in ("unavailable", "unknown"):
+        connection.send_result(msg["id"], {"ok": False, "error": "Entität hat keinen aktuellen Wert"})
+        return
+    if dom not in ("number", "select", "switch"):
+        connection.send_result(msg["id"], {"ok": None, "error": "Nur lesbar (kein Einstellwert)"})
+        return
+    nasa_name = state.attributes.get("nasa_name")
+    if not nasa_name:
+        reg = er.async_get(hass).async_get(eid)
+        nasa = await _nasa_map(hass)
+        if reg is not None:
+            uid = reg.unique_id or ""
+            k = uid[len(reg.config_entry_id) + 1:] if reg.config_entry_id and uid.startswith(reg.config_entry_id + "_") else uid.replace("samsung_ehssentinel", "", 1)
+            nasa_name = nasa.get(k.lower())
+    buf = _buffer(hass)
+    if buf is None or not nasa_name:
+        connection.send_result(msg["id"], {"ok": None, "error": "NASA-Name der Entität unbekannt"})
+        return
+    lvl = buf.current_level()
+    if lvl == "default":
+        buf.set_level("info")  # Bestätigungsmeldungen von EHS Sentinel mitlesen
+    mark = buf.entries(0, 0, 1)[-1]["id"] if buf.entries(0, 0, 1) else 0
+    value = state.state
+    if dom == "number":
+        service, data = "set_value", {"entity_id": eid, "value": float(value)}
+    elif dom == "select":
+        service, data = "select_option", {"entity_id": eid, "option": value}
+    else:
+        service, data = ("turn_on" if value == "on" else "turn_off"), {"entity_id": eid}
+    ok, text = None, "Keine Rückmeldung von EHS Sentinel"
+    try:
+        await asyncio.wait_for(hass.services.async_call(dom, service, data, blocking=True), timeout=25)
+        for e in buf.entries(mark, 0, 2000):
+            m = e["msg"]
+            if nasa_name not in m and "Cannot send write" not in m:
+                continue
+            if "Confirming write" in m:
+                ok, text = True, "Schreiben von der Wärmepumpe bestätigt"
+                break
+            if "Write failed" in m or "Cannot send write" in m:
+                ok, text = False, m
+                break
+            if "No confirmation" in m:
+                ok, text = False, "Keine Bestätigung der Wärmepumpe"
+    except asyncio.TimeoutError:
+        ok, text = False, "Zeitüberschreitung beim Schreiben"
+    except Exception as err:  # pylint: disable=broad-except
+        ok, text = False, str(err)
+    finally:
+        if lvl == "default":
+            buf.set_level("default")
+    connection.send_result(msg["id"], {"ok": ok, "error": None if ok else text, "text": text, "value": value, "nasa_name": nasa_name})
+
+
 def async_register(hass: HomeAssistant) -> None:
     for cmd in (ws_status, ws_logs, ws_log_level, ws_clear, ws_diagnostics, ws_reconnect, ws_packet_log,
-                ws_config_get, ws_config_set, ws_test_connection, ws_panel_get, ws_panel_save, ws_verify):
+                ws_config_get, ws_config_set, ws_test_connection, ws_panel_get, ws_panel_save, ws_verify, ws_verify_write):
         websocket_api.async_register_command(hass, cmd)

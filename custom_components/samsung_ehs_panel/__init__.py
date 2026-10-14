@@ -121,7 +121,7 @@ class PanelFileView(HomeAssistantView):
     async def get(self, request: web.Request, filename: str) -> web.StreamResponse:
         if "/" in filename or "\\" in filename or filename.startswith("."):
             return web.Response(status=400, text="Ungültiger Dateiname")
-        if not filename.lower().endswith((".html", ".js", ".css", ".png", ".svg", ".json")) or filename in ("manifest.json", "strings.json"):
+        if not filename.lower().endswith((".html", ".js", ".css", ".png", ".svg", ".json", ".yaml")) or filename in ("manifest.json", "strings.json"):
             return web.Response(status=404, text="Nicht gefunden")
         hass = request.app[KEY_HASS]
         def _find():

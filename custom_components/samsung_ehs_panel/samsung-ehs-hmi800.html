@@ -362,7 +362,7 @@ const SAM_UNIT = { '°C':'1011 1012 1021 1022 1031 1032 1041 1042 1051 1052 2011
 const SAM_UNIT_OF = {}; Object.entries(SAM_UNIT).forEach(([u,l])=>l.split(' ').forEach(n=>SAM_UNIT_OF['infsv'+n]=u));
 // Samsung-Optionen → Deutsch
 const SAM_TR = { OFF:'Aus', ON:'Ein', 'On Alternate':'Ein (wechselnd)', Auto:'Auto', Heat:'Heizen', Cool:'Kühlen', Dry:'Trocknen', Fan:'Lüften', 'Hot water':'Warmwasser',
-  Eco:'Eco', Standard:'Standard', Power:'Power', Force:'Forced (Extra-WW)', ROOM:'Heizung', TANK:'Warmwasser', 'STEP 1':'Stufe 1', 'STEP 2':'Stufe 2',
+  Eco:'Eco', Economy:'Eco', Standard:'Standard', Room:'Heizung', Tank:'Warmwasser', WL1:'Fußboden (WL1)', WL2:'Gebläsekonvektor (WL2)', All:'Täglich', Power:'Power', Force:'Forced (Extra-WW)', ROOM:'Heizung', TANK:'Warmwasser', 'STEP 1':'Stufe 1', 'STEP 2':'Stufe 2',
   Floor:'Fußboden (WL1)', FCU:'Gebläsekonvektor (WL2)', No:'Nein', Yes:'Ja', DHW:'Warmwasser', Heating:'Heizen',
   Sunday:'Sonntag', Monday:'Montag', Tuesday:'Dienstag', Wednesday:'Mittwoch', Thursday:'Donnerstag', Friday:'Freitag', Saturday:'Samstag', Everyday:'Täglich',
   OP_STOP:'Stopp', OP_SAFETY:'Sicherheitsabschaltung', OP_NORMAL:'Normalbetrieb', OP_BALANCE:'Ausgleich', OP_RECOVERY:'Ölrückführung', OP_DEICE:'Abtauen',
@@ -375,7 +375,7 @@ const ENTITY_OVERRIDES = Object.assign({}, SAMSUNG_MAP, {
 const INSTALLER = { name:"Sascha Matheis Haustechnik", addr:"Segelbreite 27, 34314 Espenau", tel:"" };
 const HEATING_CIRCUITS = [1,2,3,4];  // werden nur angezeigt, wenn thermostat_hcX_* existiert
 const SERVICE_PIN = "";               // leer = Servicemenü ohne PIN, z.B. "1234"
-const PANEL_VERSION = "1.3.1";   // bei jeder neuen Version erhöhen (Upload im EMS-ESP Manager)
+const PANEL_VERSION = "1.5.0";   // bei jeder neuen Version erhöhen (Upload im EMS-ESP Manager)
 
 // Vom EMS-ESP Manager beim Ausliefern gesetzt (nicht von Hand eintragen)
 const MGR = window.EMS_ESP_MANAGER || null;
@@ -476,6 +476,17 @@ const resolved = {};             // Standard-ID → tatsächliche ID (oder null)
 
 // Samsung: Entität über das Namensende „ehssentinel_<name>“ finden – egal welches Präfix
 // (samsung_ehssentinel_…, heizung_wp_ehssentinel_… nach Umbenennen) und egal ob number/sensor usw.
+// ESPHome (Beormund): EHS-Name → Anzeigename aus der mitgelieferten YAML
+const ESP_MAP = {"settemp":["Indoor unit set temperature","number"],"intemptargetzone2f":["Zone2 Room Set Temp.","number"],"indoordhwsettemp":["Speicher-Solltemperatur","number"],"indoorsettempwaterout":["Set Temp Waterout Heating Mode Zone 1","number"],"intempwateroutlettargetzone2f":["Zone 2 Vorlauf-Soll","number"],"intempwaterlawtargetf":["Verschiebung Heizkurve","number"],"infsv1011":["Vorlauf max. (1011)","number"],"infsv1012":["Vorlauf min. (1012)","number"],"infsv1021":["Raum max. (1021)","number"],"infsv1022":["Raum min. (1022)","number"],"infsv1031":["Vorlauf max. (1031)","number"],"infsv1032":["Vorlauf min. (1032)","number"],"infsv1041":["Raum max. (1041)","number"],"infsv1042":["Raum min. (1042)","number"],"infsv1051":["Speicher max. (1051)","number"],"infsv1052":["Speicher min. (1052)","number"],"infsv2011":["Außentemp. kalt (2011)","number"],"infsv2012":["Außentemp. warm (2012)","number"],"infsv2021":["Vorlauf bei kalt WL1 (2021)","number"],"infsv2022":["Vorlauf bei warm WL1 (2022)","number"],"infsv2031":["Vorlauf bei kalt WL2 (2031)","number"],"infsv2032":["Vorlauf bei warm WL2 (2032)","number"],"infsv2051":["Außentemp. max (2051)","number"],"infsv2052":["Außentemp. min (2052)","number"],"infsv2061":["Vorlauf WL1 max (2061)","number"],"infsv2062":["Vorlauf WL1 min (2062)","number"],"infsv2071":["Vorlauf WL2 max (2071)","number"],"infsv2072":["Vorlauf WL2 min (2072)","number"],"infsv3021":["WP max. Temperatur (3021)","number"],"infsv3022":["WP Stopp-Diff. (3022)","number"],"infsv3023":["WP Start-Diff. (3023)","number"],"infsv3024":["Min. Heizlaufzeit (3024)","number"],"infsv3025":["Max. WW-Laufzeit (3025)","number"],"infsv3026":["Max. Heizlaufzeit (3026)","number"],"infsv3032":["Verzögerung (3032)","number"],"infsv3033":["FSV 3033 · DHW - Booster Heat Overshoot","number"],"infsv3043":["Startzeit (FSV 3043)","number"],"infsv3044":["Temperatur (FSV 3044)","number"],"infsv3045":["Dauer (3045)","number"],"infsv3052":["Dauer (3052)","number"],"infsv3046":["Max. Zeit (3046)","number"],"infsv3081":["BUH Stufe 1 Leistung (3081)","number"],"infsv3082":["BUH Stufe 2 Leistung (3082)","number"],"infsv3083":["BSH Leistung (3083)","number"],"infsv4012":["Außentemp. für Vorrang (4012)","number"],"infsv4013":["Heizbetrieb bis (FSV 4013)","number"],"infsv4024":["Schwelltemperatur (4024)","number"],"infsv4025":["Abtau-Backup Temp. (4025)","number"],"infsv4033":["Schwelle (4033)","number"],"infsv4042":["ΔT Heizen (4042)","number"],"infsv4043":["ΔT Kühlen (4043)","number"],"infsv4044":["Regelfaktor (4044)","number"],"infsv4045":["Regelfaktor (4045)","number"],"infsv4046":["Laufzeit (4046)","number"],"infsv4052":["Pumpe ΔT (4052)","number"],"infsv4053":["Regelfaktor (4053)","number"],"infsv5011":["Vorlauf Kühlen (5011)","number"],"infsv5012":["Raum Kühlen (5012)","number"],"infsv5013":["Vorlauf Heizen (5013)","number"],"infsv5014":["Raum Heizen (5014)","number"],"infsv5015":["FSV 5015 · Outing mode - Auto Cooling WL1 Temp.","number"],"infsv5016":["FSV 5016 · Outing mode - Auto Cooling WL2 Temp.","number"],"infsv5017":["Auto Heizen WL1 (5017)","number"],"infsv5018":["Auto Heizen WL2 (5018)","number"],"infsv5019":["Speicher (5019)","number"],"infsv5021":["Spartemperatur (5021)","number"],"infsv5023":["Thermo-on Temp. (5023)","number"],"infsv5082":["Absenkung beim Kühlen (FSV 5082)","number"],"infsv5083":["Erhöhung beim Heizen (FSV 5083)","number"],"infsv5092":["Anhebung Heizen (5092)","number"],"infsv5093":["Anhebung WW (5093)","number"],"indooropmode":["Betriebsart (Auto/Heizen/Kühlen)","select"],"dhwopmode":["Warmwasser-Modus (4066)","select"],"referencetemp":["Hydro_ControlChoice_RoomTemp (406F)","select"],"infsv2041":["Heizkurven-Typ (2041)","select"],"infsv2081":["Kühlkurven-Typ (2081)","select"],"infsv2091":["Ext. Thermostat WL1 (2091)","select"],"infsv2092":["Ext. Thermostat WL2 (2092)","select"],"infsv2093":["FSV 2093 · Remote Controller - Remote Controller Room Temp. ","select"],"infsv3011":["WW-Anwendung (3011)","select"],"infsv3042":["Intervall (FSV 3042)","select"],"infsv3061":["Solar / Thermostat (3061)","select"],"infsv3071":["3-Wege-Ventil Richtung (3071)","select"],"infsv4011":["Vorrang Heizen/WW (4011)","select"],"infsv4021":["Anwendung (4021)","select"],"infsv4022":["BUH/BSH Vorrang (4022)","select"],"infsv4041":["Mischer (4041)","select"],"infsv4051":["Inverter-Pumpe (4051)","select"],"infsv5042":["Zwangsabschaltung (5042)","select"],"infsv5043":["Eingangsspannung (5043)","select"],"outdooroperationmode":["Outdoor unit cooling/heating mode (8003)","select"],"power":["Wärmepumpe","switch"],"controlsilence":["Flüstermodus","switch"],"dhwpower":["Warmwasser freigegeben","switch"],"indooroutgoing":["Abwesenheit (Outing)","switch"],"powerzone2":["Zone 2","switch"],"infsv3031":["FSV 3031","switch"],"infsv3041":["Desinfektion aktiv (FSV 3041)","switch"],"infsv3051":["Zeitbegrenzung (3051)","switch"],"infsv4023":["Kaltwetter-Kompensation (4023)","switch"],"infsv4031":["Anwendung (4031)","switch"],"infsv4032":["Kesselvorrang (4032)","switch"],"inoperationautomaticcleaning":["Enum In Operation Automatic Cleaning","switch"],"infsv4061":["Zonenregelung (4061)","switch"],"infsv5022":["Sparbetrieb (5022)","switch"],"infsv5041":["Leistungsspitzen-Steuerung (5041)","switch"],"infsv5051":["Frequenzverhältnis (5051)","switch"],"infsv5081":["PV-Steuerung (5081)","switch"],"infsv5091":["Smart Grid (5091)","switch"],"infsv5094":["WW-Modus (5094)","switch"],"nmoutsensorvoltage":["Lvar Nm Out Sensor Voltage","sensor"],"indoorrealopmode":["Indoor unit current operation mode (4002)","sensor"],"humiditypercent":["Enum In State Humidity Percent","sensor"],"dhwvalve":["Ladung aktiv (3-Wege-Ventil) (4067)","sensor"],"inthermostat1":["Hydro_ExternalThermostat","sensor"],"inthermostat2":["Hydro_ExternalThermostat2","sensor"],"instatewaterpump":["Water pump (4089)","sensor"],"in2wayvalve":["Enum In 2Way Valve","sensor"],"inwaterpumppwmvalue":["Heizungspumpe","sensor"],"indhwheatuntil":["Var In Dhw Heat Until","sensor"],"modifiedcurrenttemp":["Temperature","sensor"],"evaintemp":["Indoor Eva In Temperature","sensor"],"evaouttemp":["Indoor Eva Out Temperature","sensor"],"indoorwaterintemp":["Rücklauf Innengerät","sensor"],"indoordhwcurrenttemp":["Speichertemperatur","sensor"],"indoorwaterouttemp":["Vorlauf Innengerät","sensor"],"intempwaterlawf":["Hydro_WaterLawTargetF","sensor"],"currenttemp":["Raumtemperatur","sensor"],"intemproomzone2":["Idiom_RoomTemp_Zone2","sensor"],"inflowsensorvoltage":["Var In Flow Sensor Voltage","sensor"],"inflowsensorcalc":["Durchfluss","sensor"],"indoorpowerconsumption":["Indoor unit power consumption","sensor"],"inminutessinceinstallation":["Steuereinheit","sensor"],"inminutesactive":["Aktiv gesamt","sensor"],"ingeneratedpowerlastminute":["Generated power last minute","sensor"],"intotalgeneratedpower":["Wärme erzeugt","sensor"],"outoperationserviceop":["Indoor unit service operation steps (8000)","sensor"],"outdooroperationstatus":["Status Außengerät (8001)","sensor"],"outdoorindoordefroststep":["Indoor unit defrost operation steps (8061)","sensor"],"outdoorouttemp":["Außenluft","sensor"],"outdoorhighpress":["Hochdruck","sensor"],"outdoorlowpress":["Niederdruck","sensor"],"outdoordischargetemp1":["Heißgas (Discharge)","sensor"],"outdoorct1":["Compressor 1 current","sensor"],"outdoorcondout1":["Main heat exchanger outlet temperature","sensor"],"outdoorsuction1temp":["Sauggas","sensor"],"outdoordoubletube":["Liquid pipe temperature","sensor"],"outdooreviin":["EVI IN","sensor"],"outdooreviout":["EVI OUT","sensor"],"outerrorcode":["Fehlercode Außengerät (8235)","sensor"],"outdoorcomp1orderhz":["Frequenz-Vorgabe","sensor"],"outdoorcomp1targethz":["Verdichter Zielfrequenz","sensor"],"outdoorcomp1runhz":["Verdichterfrequenz","sensor"],"outdoordclink1volt":["DC Link1 (Inverter DC voltage input)","sensor"],"outdoorfanrpm1":["Ventilator","sensor"],"outdooroducapa1":["current electric capacity of outdoor unit","sensor"],"outdooripmtemp1":["IPM1 Temperature","sensor"],"outcontroldsh1":["Just for EHS HTU","sensor"],"outdoortopsensortemp1":["Top1","sensor"],"outdoorhighpresstemp":["Kondensationstemperatur","sensor"],"outdoorlowpresstemp":["Niederdruck Sättigungstemp.","sensor"],"outdoorevain":["Verdampfereintritt","sensor"],"outdoortw1temp":["TW1 Rücklauf WP","sensor"],"outdoortw2temp":["TW2 Vorlauf WP","sensor"],"outdoorcontrolwattmeter1unit":["Instantaneous power consumption of outdoor unit. One outdoor","sensor"],"outdoorcontrolwattmeterallunit":["Elektr. Leistungsaufnahme","sensor"],"outdoorcontrolwattmeterallunitaccum":["Strom Außengerät","sensor"],"instatethermo":["Thermo On/Off","binary_sensor"],"indoordefroststatus":["Defrost mode","binary_sensor"],"inbackupheater":["Backup-Heizer","binary_sensor"],"inboosterheater":["Booster-Heizstab","binary_sensor"],"outdoorcomp1status":["Kompressor","binary_sensor"],"outdoorhotgas1":["HotGas1 On/Off","binary_sensor"],"outdoorliquidbypassvalve":["Liquid On/Off","binary_sensor"],"outdoorevibypassvalve":["EVI ByPass On/Off","binary_sensor"],"outdoor4wayvalve":["4-Wege-Ventil (Abtauen)","binary_sensor"],"outdoorbaseheater":["Base heater On/Off state for EHS","binary_sensor"],"outloadpheheater":["Enum Out Load Pheheater","binary_sensor"],"outstatefanoper":["Enum Out State Fan Oper","sensor"]};
+const ESP_IDS = new Set();
+function espPick(obj, dom){
+  const e = ESP_MAP[obj]; if(!e) return null; const nm = e[0].toLowerCase();
+  let best = null;
+  for(const id in S){ if(id.includes('ehssentinel')) continue; const fn = String((S[id].attributes||{}).friendly_name||'').toLowerCase();
+    if(fn===nm || fn.endsWith(' '+nm)){ const ok = !['unavailable','unknown'].includes(S[id].state); if(!best || (ok && !best.ok) || (id.split('.')[0]===e[1] && best.id.split('.')[0]!==e[1])) best={id,ok}; } }
+  if(best) ESP_IDS.add(best.id);
+  return best ? best.id : null;
+}
 function samPick(t){
   const cur=S[t]; if(cur && cur.state!=='unavailable' && cur.state!=='unknown') return t;
   const ck='@'+t; if(ck in resolved){ const r=resolved[ck]; if(r===null || S[r]) return r; }
@@ -484,7 +495,7 @@ function samPick(t){
   const cands=Object.keys(S).filter(e=>{ const o=e.split('.')[1]||''; return o===suf || o.endsWith('_'+suf); });
   const score=e=>{ const v=S[e].state; return (v==='unavailable'?20:v==='unknown'?10:0) + Math.max(0,order.indexOf(e.split('.')[0])); };
   cands.sort((x,y)=>score(x)-score(y));
-  const hit=cands[0]||(cur?t:null); resolved[ck]=hit; return hit;
+  const hit=cands[0]||espPick(obj.replace(/^.*?ehssentinel_/,''), dom)||(cur?t:null); resolved[ck]=hit; return hit;
 }
 function R(id){                  // Entität auflösen
   if(userMap[id]){ const t=userMap[id]; return t.includes('ehssentinel') ? (samPick(t)||t) : t; }
@@ -498,7 +509,12 @@ function R(id){                  // Entität auflösen
   return cand||id;
 }
 function has(id){ const r=R(id); return !!S[r] && S[r].state!=='unavailable' && !(r.includes('ehssentinel') && S[r].state==='unknown' && !/^(number|select|switch)\./.test(r)); }
-function st(id){ const e=S[R(id)]; return e?e.state:null; }
+function st(id){ const r=R(id), e=S[r]; if(!e) return null; let v=e.state;
+  if(SAM_MODE && ESP_IDS.has(r)){ const o=String(r);
+    if(/^switch\./.test(o) && /^(select\.thermostat_hc1_mode|select\.thermostat_hc2_mode)$/.test(id)) v = v==='on'?'ON':v==='off'?'OFF':v;
+    if(/^(Room|Tank)$/.test(v)) v=v.toUpperCase();
+    if(id==='binary_sensor.boiler_dhw_charging' && /^[01]$/.test(v)) v = v==='1'?'TANK':'ROOM'; }
+  return v; }
 function at(id,a){ const e=S[R(id)]; return e&&e.attributes?e.attributes[a]:undefined; }
 function nv(id){ const v=parseFloat(st(id)); return isNaN(v)?null:v; }
 function unit(id){ return at(id,'unit_of_measurement') || SAM_UNIT_OF[(R(id).split('.')[1]||'').replace(EHS_PREFIX,'')] || ''; }
@@ -521,7 +537,8 @@ function callService(domain, service, data){
   return conn.call(domain,service,data).catch(e=>{ toast('Fehler: '+(e&&e.message||e)); throw e; });
 }
 function setNumber(id,v){ return callService('number','set_value',{entity_id:R(id),value:v}); }
-function setSelectIdx(id,i){ const opts=at(id,'options')||[]; if(opts[i]==null) return; return callService('select','select_option',{entity_id:R(id),option:opts[i]}); }
+function setSelectIdx(id,i){ if(R(id).startsWith('switch.')) return callService('switch', i>0?'turn_on':'turn_off', {entity_id:R(id)});
+  const opts=at(id,'options')||[]; if(opts[i]==null) return; return callService('select','select_option',{entity_id:R(id),option:opts[i]}); }
 function setSwitch(id,v){ const d=R(id).split('.')[0]; return callService(d==='input_boolean'?'input_boolean':'switch', v?'turn_on':'turn_off',{entity_id:R(id)}); }
 
 function onStates(list){ list.forEach(e=>S[e.entity_id]={state:e.state,attributes:e.attributes||{}}); for(const k in resolved) delete resolved[k]; scheduleRender(); }
@@ -1189,13 +1206,13 @@ function homeSlots(){
 // Samsung: Aktivität aus Abtaustufe, Ein/Aus, Verdichter und 3-Wege-Ventil ableiten
 function samActivity(){
   const g = k => { const r=samPick('sensor.'+EHS_PREFIX+k); return r&&S[r]?S[r].state:null; };
-  const df=g('outdoordefroststep'); if(df && !/^(No defrost operation|unknown|unavailable|0)$/.test(df)) return 'defrost';
-  if(g('power')==='OFF') return 'off';
+  const df=g('outdoordefroststep'); if(df && !/^(No defrost operation|unknown|unavailable|0|off|none|no|-)$/i.test(df)) return 'defrost';
+  if(/^off$/i.test(String(g('power')))) return 'off';
   const nf=k=>{ const v=parseFloat(g(k)); return isNaN(v)?0:v; };
   const kw = nf('outdoorcontrolwattmeterallunit'); const kwv = kw>50 ? kw/1000 : kw;   // W oder kW
   const comp = g('outdoorcomp1status')==='on' || nf('outdoorcomp1runhz')>0 || kwv>0.15 || nf('ehssentinelheatoutput')>100;
   if(!comp) return 'off';
-  if(g('dhwvalve')==='TANK') return 'hot water';
+  if(/^(TANK|1|on)$/i.test(String(g('dhwvalve')))) return 'hot water';
   if(g('indooropmode')==='Cool') return 'cooling';
   return 'heating';
 }

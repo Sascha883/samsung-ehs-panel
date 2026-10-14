@@ -1,0 +1,841 @@
+# Samsung EHS – ESPHome (Beormund/esphome-samsung-nasa) – erzeugt für das „Samsung EHS Panel“
+# Alle Namen sind so gewählt, dass das Panel die Entitäten automatisch findet. Namen bitte nicht ändern.
+# Indoor = nasa_device_1 (20.00.00), Outdoor = nasa_device_2 (10.00.00)
+# Import external component from GitHub
+external_components:
+  - source: github://beormund/esphome-samsung-nasa@main
+    components: [samsung_nasa]
+
+esphome:
+  name: samsung-wp-nasa
+  friendly_name: Samsung WP
+  min_version: 2026.5.0
+
+esp32:
+  board: m5stack-atom
+  framework:
+    # Arduino framework has faster compilation but 
+    # uses more RAM and Flash; ESP-IDF framework has 
+    # slower compilation but uses less RAM and FLash
+    type: esp-idf
+    # type: arduino
+
+# Enable logging
+logger:
+  logs:
+    component: ERROR
+
+# Enable Home Assistant API
+api:
+
+# Allow Over-The-Air updates
+ota:
+  - platform: web_server
+  - platform: esphome
+
+wifi:
+  ssid: !secret wifi_ssid
+  password: !secret wifi_password
+  # Set up a wifi access point
+  ap: {}
+
+# In combination with the ap: this allows the user
+# to provision wifi credentials to the device via WiFi AP.
+captive_portal:
+
+# This creates a HA style local web page 
+web_server:
+  port: 80
+  version: 3
+  log: true
+  local: true
+
+# Specify pins used by the board to communicate over RS485
+uart:
+  tx_pin: GPIO19
+  rx_pin: GPIO22
+  baud_rate: 9600
+  parity: EVEN
+
+## SAMSUNG NASA CONFIGURATION
+samsung_nasa:
+  debug_log_messages: false
+  debug_log_undefined_messages: false
+  nasa_client: {}
+  devices:
+   - address: 20.00.00
+     id: nasa_device_1
+   - address: 10.00.00
+     id: nasa_device_2
+
+number:
+  - platform: samsung_nasa
+    message: 0x4201
+    nasa_device_id: nasa_device_1
+    name: "Indoor unit set temperature"
+  - platform: samsung_nasa
+    message: 0x4235
+    nasa_device_id: nasa_device_1
+    name: "Speicher-Solltemperatur"
+  - platform: samsung_nasa
+    message: 0x4247
+    nasa_device_id: nasa_device_1
+    name: "Set Temp Waterout Heating Mode Zone 1"
+  - platform: samsung_nasa
+    message: 0x4248
+    nasa_device_id: nasa_device_1
+    name: "Verschiebung Heizkurve"
+  - platform: samsung_nasa
+    message: 0x42D6
+    nasa_device_id: nasa_device_1
+    name: "Zone2 Room Set Temp."
+  - platform: samsung_nasa
+    message: 0x42D7
+    nasa_device_id: nasa_device_2
+    name: "Zone 2 Vorlauf-Soll"
+  - platform: samsung_nasa
+    fsv: 1011
+    nasa_device_id: nasa_device_1
+    name: "Vorlauf max. (1011)"
+  - platform: samsung_nasa
+    fsv: 1012
+    nasa_device_id: nasa_device_1
+    name: "Vorlauf min. (1012)"
+  - platform: samsung_nasa
+    fsv: 1021
+    nasa_device_id: nasa_device_1
+    name: "Raum max. (1021)"
+  - platform: samsung_nasa
+    fsv: 1022
+    nasa_device_id: nasa_device_1
+    name: "Raum min. (1022)"
+  - platform: samsung_nasa
+    fsv: 1031
+    nasa_device_id: nasa_device_1
+    name: "Vorlauf max. (1031)"
+  - platform: samsung_nasa
+    fsv: 1032
+    nasa_device_id: nasa_device_1
+    name: "Vorlauf min. (1032)"
+  - platform: samsung_nasa
+    fsv: 1041
+    nasa_device_id: nasa_device_1
+    name: "Raum max. (1041)"
+  - platform: samsung_nasa
+    fsv: 1042
+    nasa_device_id: nasa_device_1
+    name: "Raum min. (1042)"
+  - platform: samsung_nasa
+    fsv: 1051
+    nasa_device_id: nasa_device_1
+    name: "Speicher max. (1051)"
+  - platform: samsung_nasa
+    fsv: 1052
+    nasa_device_id: nasa_device_1
+    name: "Speicher min. (1052)"
+  - platform: samsung_nasa
+    fsv: 2011
+    nasa_device_id: nasa_device_1
+    name: "Außentemp. kalt (2011)"
+  - platform: samsung_nasa
+    fsv: 2012
+    nasa_device_id: nasa_device_1
+    name: "Außentemp. warm (2012)"
+  - platform: samsung_nasa
+    fsv: 2021
+    nasa_device_id: nasa_device_1
+    name: "Vorlauf bei kalt WL1 (2021)"
+  - platform: samsung_nasa
+    fsv: 2022
+    nasa_device_id: nasa_device_1
+    name: "Vorlauf bei warm WL1 (2022)"
+  - platform: samsung_nasa
+    fsv: 2031
+    nasa_device_id: nasa_device_1
+    name: "Vorlauf bei kalt WL2 (2031)"
+  - platform: samsung_nasa
+    fsv: 2032
+    nasa_device_id: nasa_device_1
+    name: "Vorlauf bei warm WL2 (2032)"
+  - platform: samsung_nasa
+    fsv: 2051
+    nasa_device_id: nasa_device_1
+    name: "Außentemp. max (2051)"
+  - platform: samsung_nasa
+    fsv: 2052
+    nasa_device_id: nasa_device_1
+    name: "Außentemp. min (2052)"
+  - platform: samsung_nasa
+    fsv: 2061
+    nasa_device_id: nasa_device_1
+    name: "Vorlauf WL1 max (2061)"
+  - platform: samsung_nasa
+    fsv: 2062
+    nasa_device_id: nasa_device_1
+    name: "Vorlauf WL1 min (2062)"
+  - platform: samsung_nasa
+    fsv: 2071
+    nasa_device_id: nasa_device_1
+    name: "Vorlauf WL2 max (2071)"
+  - platform: samsung_nasa
+    fsv: 2072
+    nasa_device_id: nasa_device_1
+    name: "Vorlauf WL2 min (2072)"
+  - platform: samsung_nasa
+    fsv: 3021
+    nasa_device_id: nasa_device_1
+    name: "WP max. Temperatur (3021)"
+  - platform: samsung_nasa
+    fsv: 3022
+    nasa_device_id: nasa_device_1
+    name: "WP Stopp-Diff. (3022)"
+  - platform: samsung_nasa
+    fsv: 3023
+    nasa_device_id: nasa_device_1
+    name: "WP Start-Diff. (3023)"
+  - platform: samsung_nasa
+    fsv: 3024
+    nasa_device_id: nasa_device_1
+    name: "Min. Heizlaufzeit (3024)"
+  - platform: samsung_nasa
+    fsv: 3025
+    nasa_device_id: nasa_device_1
+    name: "Max. WW-Laufzeit (3025)"
+  - platform: samsung_nasa
+    fsv: 3026
+    nasa_device_id: nasa_device_1
+    name: "Max. Heizlaufzeit (3026)"
+  - platform: samsung_nasa
+    fsv: 3032
+    nasa_device_id: nasa_device_1
+    name: "Verzögerung (3032)"
+  - platform: samsung_nasa
+    fsv: 3033
+    nasa_device_id: nasa_device_1
+    name: "FSV 3033 · DHW - Booster Heat Overshoot"
+  - platform: samsung_nasa
+    fsv: 3043
+    nasa_device_id: nasa_device_1
+    name: "Startzeit (FSV 3043)"
+  - platform: samsung_nasa
+    fsv: 3044
+    nasa_device_id: nasa_device_1
+    name: "Temperatur (FSV 3044)"
+  - platform: samsung_nasa
+    fsv: 3045
+    nasa_device_id: nasa_device_1
+    name: "Dauer (3045)"
+  - platform: samsung_nasa
+    fsv: 3046
+    nasa_device_id: nasa_device_1
+    name: "Max. Zeit (3046)"
+  - platform: samsung_nasa
+    fsv: 3052
+    nasa_device_id: nasa_device_1
+    name: "Dauer (3052)"
+  - platform: samsung_nasa
+    fsv: 3081
+    nasa_device_id: nasa_device_1
+    name: "BUH Stufe 1 Leistung (3081)"
+  - platform: samsung_nasa
+    fsv: 3082
+    nasa_device_id: nasa_device_1
+    name: "BUH Stufe 2 Leistung (3082)"
+  - platform: samsung_nasa
+    fsv: 3083
+    nasa_device_id: nasa_device_1
+    name: "BSH Leistung (3083)"
+  - platform: samsung_nasa
+    fsv: 4012
+    nasa_device_id: nasa_device_1
+    name: "Außentemp. für Vorrang (4012)"
+  - platform: samsung_nasa
+    fsv: 4013
+    nasa_device_id: nasa_device_1
+    name: "Heizbetrieb bis (FSV 4013)"
+  - platform: samsung_nasa
+    fsv: 4024
+    nasa_device_id: nasa_device_1
+    name: "Schwelltemperatur (4024)"
+  - platform: samsung_nasa
+    fsv: 4025
+    nasa_device_id: nasa_device_1
+    name: "Abtau-Backup Temp. (4025)"
+  - platform: samsung_nasa
+    fsv: 4033
+    nasa_device_id: nasa_device_1
+    name: "Schwelle (4033)"
+  - platform: samsung_nasa
+    fsv: 4042
+    nasa_device_id: nasa_device_1
+    name: "ΔT Heizen (4042)"
+  - platform: samsung_nasa
+    fsv: 4043
+    nasa_device_id: nasa_device_1
+    name: "ΔT Kühlen (4043)"
+  - platform: samsung_nasa
+    fsv: 4044
+    nasa_device_id: nasa_device_1
+    name: "Regelfaktor (4044)"
+  - platform: samsung_nasa
+    fsv: 4045
+    nasa_device_id: nasa_device_1
+    name: "Regelfaktor (4045)"
+  - platform: samsung_nasa
+    fsv: 4046
+    nasa_device_id: nasa_device_1
+    name: "Laufzeit (4046)"
+  - platform: samsung_nasa
+    fsv: 4052
+    nasa_device_id: nasa_device_1
+    name: "Pumpe ΔT (4052)"
+  - platform: samsung_nasa
+    fsv: 4053
+    nasa_device_id: nasa_device_1
+    name: "Regelfaktor (4053)"
+  - platform: samsung_nasa
+    fsv: 5011
+    nasa_device_id: nasa_device_1
+    name: "Vorlauf Kühlen (5011)"
+  - platform: samsung_nasa
+    fsv: 5012
+    nasa_device_id: nasa_device_1
+    name: "Raum Kühlen (5012)"
+  - platform: samsung_nasa
+    fsv: 5013
+    nasa_device_id: nasa_device_1
+    name: "Vorlauf Heizen (5013)"
+  - platform: samsung_nasa
+    fsv: 5014
+    nasa_device_id: nasa_device_1
+    name: "Raum Heizen (5014)"
+  - platform: samsung_nasa
+    fsv: 5015
+    nasa_device_id: nasa_device_1
+    name: "FSV 5015 · Outing mode - Auto Cooling WL1 Temp."
+  - platform: samsung_nasa
+    fsv: 5016
+    nasa_device_id: nasa_device_1
+    name: "FSV 5016 · Outing mode - Auto Cooling WL2 Temp."
+  - platform: samsung_nasa
+    fsv: 5017
+    nasa_device_id: nasa_device_1
+    name: "Auto Heizen WL1 (5017)"
+  - platform: samsung_nasa
+    fsv: 5018
+    nasa_device_id: nasa_device_1
+    name: "Auto Heizen WL2 (5018)"
+  - platform: samsung_nasa
+    fsv: 5019
+    nasa_device_id: nasa_device_1
+    name: "Speicher (5019)"
+  - platform: samsung_nasa
+    fsv: 5021
+    nasa_device_id: nasa_device_1
+    name: "Spartemperatur (5021)"
+  - platform: samsung_nasa
+    fsv: 5023
+    nasa_device_id: nasa_device_1
+    name: "Thermo-on Temp. (5023)"
+  - platform: samsung_nasa
+    fsv: 5082
+    nasa_device_id: nasa_device_1
+    name: "Absenkung beim Kühlen (FSV 5082)"
+  - platform: samsung_nasa
+    fsv: 5083
+    nasa_device_id: nasa_device_1
+    name: "Erhöhung beim Heizen (FSV 5083)"
+  - platform: samsung_nasa
+    fsv: 5092
+    nasa_device_id: nasa_device_1
+    name: "Anhebung Heizen (5092)"
+  - platform: samsung_nasa
+    fsv: 5093
+    nasa_device_id: nasa_device_1
+    name: "Anhebung WW (5093)"
+
+select:
+  - platform: samsung_nasa
+    message: 0x4001
+    nasa_device_id: nasa_device_1
+    name: "Betriebsart (Auto/Heizen/Kühlen)"
+  - platform: samsung_nasa
+    message: 0x4066
+    nasa_device_id: nasa_device_1
+    name: "Warmwasser-Modus (4066)"
+  - platform: samsung_nasa
+    message: 0x406F
+    nasa_device_id: nasa_device_1
+    name: "Hydro_ControlChoice_RoomTemp (406F)"
+  - platform: samsung_nasa
+    message: 0x8003
+    nasa_device_id: nasa_device_2
+    name: "Outdoor unit cooling/heating mode (8003)"
+  - platform: samsung_nasa
+    fsv: 2041
+    nasa_device_id: nasa_device_1
+    name: "Heizkurven-Typ (2041)"
+  - platform: samsung_nasa
+    fsv: 2081
+    nasa_device_id: nasa_device_1
+    name: "Kühlkurven-Typ (2081)"
+  - platform: samsung_nasa
+    fsv: 2091
+    nasa_device_id: nasa_device_1
+    name: "Ext. Thermostat WL1 (2091)"
+  - platform: samsung_nasa
+    fsv: 2092
+    nasa_device_id: nasa_device_1
+    name: "Ext. Thermostat WL2 (2092)"
+  - platform: samsung_nasa
+    fsv: 2093
+    nasa_device_id: nasa_device_1
+    name: "FSV 2093 · Remote Controller - Remote Controller Room Temp. "
+  - platform: samsung_nasa
+    fsv: 3011
+    nasa_device_id: nasa_device_1
+    name: "WW-Anwendung (3011)"
+  - platform: samsung_nasa
+    fsv: 3042
+    nasa_device_id: nasa_device_1
+    name: "Intervall (FSV 3042)"
+  - platform: samsung_nasa
+    fsv: 3061
+    nasa_device_id: nasa_device_1
+    name: "Solar / Thermostat (3061)"
+  - platform: samsung_nasa
+    fsv: 3071
+    nasa_device_id: nasa_device_1
+    name: "3-Wege-Ventil Richtung (3071)"
+  - platform: samsung_nasa
+    fsv: 4011
+    nasa_device_id: nasa_device_1
+    name: "Vorrang Heizen/WW (4011)"
+  - platform: samsung_nasa
+    fsv: 4021
+    nasa_device_id: nasa_device_1
+    name: "Anwendung (4021)"
+  - platform: samsung_nasa
+    fsv: 4022
+    nasa_device_id: nasa_device_1
+    name: "BUH/BSH Vorrang (4022)"
+  - platform: samsung_nasa
+    fsv: 4041
+    nasa_device_id: nasa_device_1
+    name: "Mischer (4041)"
+  - platform: samsung_nasa
+    fsv: 4051
+    nasa_device_id: nasa_device_1
+    name: "Inverter-Pumpe (4051)"
+  - platform: samsung_nasa
+    fsv: 5042
+    nasa_device_id: nasa_device_1
+    name: "Zwangsabschaltung (5042)"
+  - platform: samsung_nasa
+    fsv: 5043
+    nasa_device_id: nasa_device_1
+    name: "Eingangsspannung (5043)"
+
+switch:
+  - platform: samsung_nasa
+    message: 0x4000
+    nasa_device_id: nasa_device_1
+    name: "Wärmepumpe"
+  - platform: samsung_nasa
+    message: 0x4046
+    nasa_device_id: nasa_device_1
+    name: "Flüstermodus"
+  - platform: samsung_nasa
+    message: 0x4065
+    nasa_device_id: nasa_device_1
+    name: "Warmwasser freigegeben"
+  - platform: samsung_nasa
+    message: 0x406D
+    nasa_device_id: nasa_device_2
+    name: "Abwesenheit (Outing)"
+  - platform: samsung_nasa
+    message: 0x4111
+    nasa_device_id: nasa_device_1
+    name: "Enum In Operation Automatic Cleaning"
+  - platform: samsung_nasa
+    message: 0x411E
+    nasa_device_id: nasa_device_1
+    name: "Zone 2"
+  - platform: samsung_nasa
+    fsv: 3031
+    nasa_device_id: nasa_device_1
+    name: "FSV 3031"
+  - platform: samsung_nasa
+    fsv: 3041
+    nasa_device_id: nasa_device_1
+    name: "Desinfektion aktiv (FSV 3041)"
+  - platform: samsung_nasa
+    fsv: 3051
+    nasa_device_id: nasa_device_1
+    name: "Zeitbegrenzung (3051)"
+  - platform: samsung_nasa
+    fsv: 4023
+    nasa_device_id: nasa_device_1
+    name: "Kaltwetter-Kompensation (4023)"
+  - platform: samsung_nasa
+    fsv: 4031
+    nasa_device_id: nasa_device_1
+    name: "Anwendung (4031)"
+  - platform: samsung_nasa
+    fsv: 4032
+    nasa_device_id: nasa_device_1
+    name: "Kesselvorrang (4032)"
+  - platform: samsung_nasa
+    fsv: 4061
+    nasa_device_id: nasa_device_1
+    name: "Zonenregelung (4061)"
+  - platform: samsung_nasa
+    fsv: 5022
+    nasa_device_id: nasa_device_1
+    name: "Sparbetrieb (5022)"
+  - platform: samsung_nasa
+    fsv: 5041
+    nasa_device_id: nasa_device_1
+    name: "Leistungsspitzen-Steuerung (5041)"
+  - platform: samsung_nasa
+    fsv: 5051
+    nasa_device_id: nasa_device_1
+    name: "Frequenzverhältnis (5051)"
+  - platform: samsung_nasa
+    fsv: 5081
+    nasa_device_id: nasa_device_1
+    name: "PV-Steuerung (5081)"
+  - platform: samsung_nasa
+    fsv: 5091
+    nasa_device_id: nasa_device_1
+    name: "Smart Grid (5091)"
+  - platform: samsung_nasa
+    fsv: 5094
+    nasa_device_id: nasa_device_1
+    name: "WW-Modus (5094)"
+
+sensor:
+  - platform: samsung_nasa
+    message: 0x24FC
+    nasa_device_id: nasa_device_2
+    name: "Lvar Nm Out Sensor Voltage"
+  - platform: samsung_nasa
+    message: 0x4002
+    nasa_device_id: nasa_device_1
+    name: "Indoor unit current operation mode (4002)"
+  - platform: samsung_nasa
+    message: 0x4038
+    nasa_device_id: nasa_device_1
+    name: "Enum In State Humidity Percent"
+  - platform: samsung_nasa
+    message: 0x4067
+    nasa_device_id: nasa_device_1
+    name: "Ladung aktiv (3-Wege-Ventil) (4067)"
+  - platform: samsung_nasa
+    message: 0x4069
+    nasa_device_id: nasa_device_1
+    name: "Hydro_ExternalThermostat"
+  - platform: samsung_nasa
+    message: 0x406A
+    nasa_device_id: nasa_device_1
+    name: "Hydro_ExternalThermostat2"
+  - platform: samsung_nasa
+    message: 0x4089
+    nasa_device_id: nasa_device_1
+    name: "Water pump (4089)"
+  - platform: samsung_nasa
+    message: 0x408A
+    nasa_device_id: nasa_device_1
+    name: "Enum In 2Way Valve"
+  - platform: samsung_nasa
+    message: 0x40C4
+    nasa_device_id: nasa_device_1
+    name: "Heizungspumpe"
+  - platform: samsung_nasa
+    message: 0x4202
+    nasa_device_id: nasa_device_1
+    name: "Var In Dhw Heat Until"
+  - platform: samsung_nasa
+    message: 0x4203
+    nasa_device_id: nasa_device_1
+    name: "Raumtemperatur"
+  - platform: samsung_nasa
+    message: 0x4204
+    nasa_device_id: nasa_device_2
+    name: "Temperature"
+  - platform: samsung_nasa
+    message: 0x4205
+    nasa_device_id: nasa_device_1
+    name: "Indoor Eva In Temperature"
+  - platform: samsung_nasa
+    message: 0x4206
+    nasa_device_id: nasa_device_2
+    name: "Indoor Eva Out Temperature"
+  - platform: samsung_nasa
+    message: 0x4236
+    nasa_device_id: nasa_device_1
+    name: "Rücklauf Innengerät"
+  - platform: samsung_nasa
+    message: 0x4237
+    nasa_device_id: nasa_device_1
+    name: "Speichertemperatur"
+  - platform: samsung_nasa
+    message: 0x4238
+    nasa_device_id: nasa_device_2
+    name: "Vorlauf Innengerät"
+  - platform: samsung_nasa
+    message: 0x427F
+    nasa_device_id: nasa_device_1
+    name: "Hydro_WaterLawTargetF"
+  - platform: samsung_nasa
+    message: 0x4284
+    nasa_device_id: nasa_device_1
+    name: "Indoor unit power consumption"
+  - platform: samsung_nasa
+    message: 0x42D4
+    nasa_device_id: nasa_device_1
+    name: "Idiom_RoomTemp_Zone2"
+  - platform: samsung_nasa
+    message: 0x42E8
+    nasa_device_id: nasa_device_1
+    name: "Var In Flow Sensor Voltage"
+  - platform: samsung_nasa
+    message: 0x42E9
+    nasa_device_id: nasa_device_1
+    name: "Durchfluss"
+  - platform: samsung_nasa
+    message: 0x4423
+    nasa_device_id: nasa_device_1
+    name: "Steuereinheit"
+  - platform: samsung_nasa
+    message: 0x4424
+    nasa_device_id: nasa_device_1
+    name: "Aktiv gesamt"
+  - platform: samsung_nasa
+    message: 0x4426
+    nasa_device_id: nasa_device_1
+    name: "Generated power last minute"
+  - platform: samsung_nasa
+    message: 0x4427
+    nasa_device_id: nasa_device_1
+    name: "Wärme erzeugt"
+  - platform: samsung_nasa
+    message: 0x8000
+    nasa_device_id: nasa_device_2
+    name: "Indoor unit service operation steps (8000)"
+  - platform: samsung_nasa
+    message: 0x8001
+    nasa_device_id: nasa_device_2
+    name: "Status Außengerät (8001)"
+  - platform: samsung_nasa
+    message: 0x8061
+    nasa_device_id: nasa_device_2
+    name: "Indoor unit defrost operation steps (8061)"
+  - platform: samsung_nasa
+    message: 0x8204
+    nasa_device_id: nasa_device_2
+    name: "Außenluft"
+  - platform: samsung_nasa
+    message: 0x8206
+    nasa_device_id: nasa_device_2
+    name: "Hochdruck"
+  - platform: samsung_nasa
+    message: 0x8208
+    nasa_device_id: nasa_device_2
+    name: "Niederdruck"
+  - platform: samsung_nasa
+    message: 0x820A
+    nasa_device_id: nasa_device_2
+    name: "Heißgas (Discharge)"
+  - platform: samsung_nasa
+    message: 0x8217
+    nasa_device_id: nasa_device_2
+    name: "Compressor 1 current"
+  - platform: samsung_nasa
+    message: 0x8218
+    nasa_device_id: nasa_device_2
+    name: "Main heat exchanger outlet temperature"
+  - platform: samsung_nasa
+    message: 0x821A
+    nasa_device_id: nasa_device_2
+    name: "Sauggas"
+  - platform: samsung_nasa
+    message: 0x821C
+    nasa_device_id: nasa_device_2
+    name: "Liquid pipe temperature"
+  - platform: samsung_nasa
+    message: 0x821E
+    nasa_device_id: nasa_device_2
+    name: "EVI IN"
+  - platform: samsung_nasa
+    message: 0x8220
+    nasa_device_id: nasa_device_2
+    name: "EVI OUT"
+  - platform: samsung_nasa
+    message: 0x8235
+    nasa_device_id: nasa_device_2
+    name: "Fehlercode Außengerät (8235)"
+  - platform: samsung_nasa
+    message: 0x8236
+    nasa_device_id: nasa_device_2
+    name: "Frequenz-Vorgabe"
+  - platform: samsung_nasa
+    message: 0x8237
+    nasa_device_id: nasa_device_2
+    name: "Verdichter Zielfrequenz"
+  - platform: samsung_nasa
+    message: 0x8238
+    nasa_device_id: nasa_device_2
+    name: "Verdichterfrequenz"
+  - platform: samsung_nasa
+    message: 0x823B
+    nasa_device_id: nasa_device_2
+    name: "DC Link1 (Inverter DC voltage input)"
+  - platform: samsung_nasa
+    message: 0x823D
+    nasa_device_id: nasa_device_2
+    name: "Ventilator"
+  - platform: samsung_nasa
+    message: 0x8240
+    nasa_device_id: nasa_device_2
+    name: "current electric capacity of outdoor unit"
+  - platform: samsung_nasa
+    message: 0x8254
+    nasa_device_id: nasa_device_2
+    name: "IPM1 Temperature"
+  - platform: samsung_nasa
+    message: 0x827A
+    nasa_device_id: nasa_device_2
+    name: "Just for EHS HTU"
+  - platform: samsung_nasa
+    message: 0x8280
+    nasa_device_id: nasa_device_2
+    name: "Top1"
+  - platform: samsung_nasa
+    message: 0x829F
+    nasa_device_id: nasa_device_2
+    name: "Kondensationstemperatur"
+  - platform: samsung_nasa
+    message: 0x82A0
+    nasa_device_id: nasa_device_2
+    name: "Niederdruck Sättigungstemp."
+  - platform: samsung_nasa
+    message: 0x82DE
+    nasa_device_id: nasa_device_2
+    name: "Verdampfereintritt"
+  - platform: samsung_nasa
+    message: 0x82DF
+    nasa_device_id: nasa_device_2
+    name: "TW1 Rücklauf WP"
+  - platform: samsung_nasa
+    message: 0x82E0
+    nasa_device_id: nasa_device_2
+    name: "TW2 Vorlauf WP"
+  - platform: samsung_nasa
+    message: 0x8411
+    nasa_device_id: nasa_device_2
+    name: "Instantaneous power consumption of outdoor unit. One outdoor"
+  - platform: samsung_nasa
+    message: 0x8413
+    nasa_device_id: nasa_device_2
+    name: "Elektr. Leistungsaufnahme"
+  - platform: samsung_nasa
+    message: 0x8414
+    nasa_device_id: nasa_device_2
+    name: "Strom Außengerät"
+
+binary_sensor:
+  - platform: samsung_nasa
+    message: 0x4028
+    nasa_device_id: nasa_device_1
+    name: "Thermo On/Off"
+  - platform: samsung_nasa
+    message: 0x402E
+    nasa_device_id: nasa_device_1
+    name: "Defrost mode"
+  - platform: samsung_nasa
+    message: 0x4067
+    nasa_device_id: nasa_device_1
+    name: "Ladung aktiv (3-Wege-Ventil) (4067)"
+  - platform: samsung_nasa
+    message: 0x406C
+    nasa_device_id: nasa_device_1
+    name: "Backup-Heizer"
+  - platform: samsung_nasa
+    message: 0x406F
+    nasa_device_id: nasa_device_1
+    name: "Hydro_ControlChoice_RoomTemp (406F)"
+  - platform: samsung_nasa
+    message: 0x4087
+    nasa_device_id: nasa_device_1
+    name: "Booster-Heizstab"
+  - platform: samsung_nasa
+    message: 0x4089
+    nasa_device_id: nasa_device_1
+    name: "Water pump (4089)"
+  - platform: samsung_nasa
+    message: 0x8010
+    nasa_device_id: nasa_device_2
+    name: "Kompressor"
+  - platform: samsung_nasa
+    message: 0x8017
+    nasa_device_id: nasa_device_2
+    name: "HotGas1 On/Off"
+  - platform: samsung_nasa
+    message: 0x8019
+    nasa_device_id: nasa_device_2
+    name: "Liquid On/Off"
+  - platform: samsung_nasa
+    message: 0x801A
+    nasa_device_id: nasa_device_2
+    name: "4-Wege-Ventil (Abtauen)"
+  - platform: samsung_nasa
+    message: 0x8021
+    nasa_device_id: nasa_device_2
+    name: "EVI ByPass On/Off"
+  - platform: samsung_nasa
+    message: 0x80AF
+    nasa_device_id: nasa_device_2
+    name: "Base heater On/Off state for EHS"
+  - platform: samsung_nasa
+    message: 0x80D7
+    nasa_device_id: nasa_device_2
+    name: "Enum Out Load Pheheater"
+
+text_sensor:
+  - platform: samsung_nasa
+    message: 0x4002
+    nasa_device_id: nasa_device_1
+    name: "Indoor unit current operation mode (4002)"
+  - platform: samsung_nasa
+    message: 0x4066
+    nasa_device_id: nasa_device_1
+    name: "Warmwasser-Modus (4066)"
+  - platform: samsung_nasa
+    message: 0x4067
+    nasa_device_id: nasa_device_1
+    name: "Ladung aktiv (3-Wege-Ventil) (4067)"
+  - platform: samsung_nasa
+    message: 0x8000
+    nasa_device_id: nasa_device_2
+    name: "Indoor unit service operation steps (8000)"
+  - platform: samsung_nasa
+    message: 0x8001
+    nasa_device_id: nasa_device_2
+    name: "Status Außengerät (8001)"
+  - platform: samsung_nasa
+    message: 0x8003
+    nasa_device_id: nasa_device_2
+    name: "Outdoor unit cooling/heating mode (8003)"
+  - platform: samsung_nasa
+    message: 0x800D
+    nasa_device_id: nasa_device_2
+    name: "Enum Out State Fan Oper"
+  - platform: samsung_nasa
+    message: 0x8061
+    nasa_device_id: nasa_device_2
+    name: "Indoor unit defrost operation steps (8061)"
+  - platform: samsung_nasa
+    message: 0x8235
+    nasa_device_id: nasa_device_2
+    name: "Fehlercode Außengerät (8235)"

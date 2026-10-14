@@ -140,6 +140,25 @@ details summary{cursor:pointer;color:var(--dim);font-size:13.5px}
 .vm.y{background:color-mix(in srgb,var(--ok) 18%,transparent);color:var(--ok)}.vm.n{background:color-mix(in srgb,var(--warn) 20%,transparent);color:var(--warn)}
 .expl{color:var(--dim);font-size:15px;line-height:1.6;padding:12px}
 .expl b{color:var(--txt);font-weight:500}
+.pick{max-width:900px;margin:0 auto}
+.pick .hd{display:grid;grid-template-columns:40px 1fr 40px;align-items:center}
+.pick .hd h1{margin:0;font-size:26px;font-weight:400;text-align:center}
+.pick .hd button{background:none;border:0;color:var(--txt);cursor:pointer;padding:4px;display:grid;place-items:center}
+.pick .hd button svg{width:28px;height:28px}
+.pick .bar{height:3px;border-radius:2px;background:var(--acc);margin:10px 0 18px}
+.pick .lb{color:var(--dim);font-size:15px;margin:16px 0 6px}
+.pick .fn{font-size:22px;display:flex;align-items:center;gap:10px;flex-wrap:wrap}
+.pick .fn .pill{font-size:15px;padding:3px 12px}
+.pick .std{font-size:17px;word-break:break-all}
+.pick .pcard{display:flex;align-items:center;gap:16px;background:var(--card);border:1px solid var(--line);border-radius:var(--r);padding:16px 20px}
+.pick .pcard .tx{flex:1;min-width:0}.pick .pcard .tx b{display:block;font-size:20px;font-weight:400}.pick .pcard .tx span{color:var(--dim)}
+.pick .pres{margin-top:8px;font-size:14.5px;line-height:1.6}
+.pick .ein{width:100%;font:17px ui-monospace,Menlo,Consolas,monospace;color:var(--txt);background:var(--card);border:1px solid var(--line);border-radius:var(--r);padding:14px 18px}
+.pick .hint{font-size:13.5px;margin-top:6px;color:var(--dim)}
+.pick .bb3{display:grid;grid-template-columns:repeat(3,1fr);gap:14px;margin-top:28px}
+.pick .bb3 button{font:inherit;font-size:18px;padding:13px;border-radius:8px;cursor:pointer;border:1px solid var(--line);background:transparent;color:var(--txt)}
+.pick .bb3 button.pri{background:var(--acc);border-color:var(--acc);color:#fff}
+@media (max-width:760px){.pick .bb3{grid-template-columns:1fr}.pick .pcard{flex-wrap:wrap}}
 .pk2{display:flex;justify-content:space-between;gap:12px;padding:10px 12px;border-bottom:1px solid var(--line);cursor:pointer}
 .pk2:hover{background:var(--card2)}
 .pk2 small{display:block;color:var(--dim);font-family:ui-monospace,Menlo,Consolas,monospace;font-size:12px;word-break:break-all}
@@ -219,8 +238,8 @@ function errText(e){ const c=e&&e.code, m=(e&&e.message)||String(e||'Fehler');
 /* ---------- Zustand ---------- */
 const st = { tab:(()=>{ try{ return sessionStorage.getItem('ehsm_tab')||'over'; }catch(e){ return 'over'; } })(),
              ent:{q:'', f:'all'},
-             map:{view:'areas', area:null, f:'all', q:'', pick:null, pq:'', verify:null, verifying:false},
-             cat:null, pmap:{}, pmapAdmin:true,
+             map:{view:'areas', src:'all', area:null, f:'all', q:'', pick:null, pq:'', verify:null, verifying:false},
+             cat:null, repo:null, repoBy:{}, esp:null, espByName:{}, pmap:{}, pmapAdmin:true,
              status:null, err:null, sel:null, cfg:null, cfgFor:null, form:null, cfgMsg:null, busy:false,
              log:{tab:'log', level:'all', data:null, err:null, pause:false, file:null} };
 
@@ -277,6 +296,7 @@ function render(){
   if(st.err && !st.status){ $('#app').innerHTML = `<div class="fatal">${esc(st.err)}</div>`; return; }
   if(!st.status){ $('#app').innerHTML = `<div class="fatal">Lade …</div>`; return; }
   const S = st.status, inst = S.instances.find(x=>x.entry_id===st.sel), U = updates();
+  const ents = ehsEntities();
   const yn = v => v==null ? '–' : v ? 'Ein' : 'Aus';
   const stateTxt = ({loaded:'Geladen',setup_error:'Einrichtungsfehler',setup_retry:'Einrichtung wird wiederholt',not_loaded:'Nicht geladen',failed_unload:'Entladen fehlgeschlagen',setup_in_progress:'Wird eingerichtet'});
 
@@ -287,6 +307,9 @@ function render(){
     <div class="card rows">${row('tag','Panel-Version',esc(S.version))}${row('info','Integration','Samsung EHS Panel')}</div>
     ${U.panel ? updCard('Samsung EHS Panel', U.panel, S.version) : ''}
     ${actBtn('panel','Panel öffnen','Samsung-Bedieneinheit',()=>openHA('/samsung-ehs'))}
+    <h2>${IC.chip}ESPHome (Beormund)</h2>
+    <div class="card rows">${row('info','Erkannte ESPHome-Werte',String(ents.filter(e=>!/ehssentinel/.test(e.id)).length)+' von '+Object.keys(st.esp||{}).length)}${row('link','Projekt','<a href="https://github.com/Beormund/esphome-samsung-nasa" target="_blank" rel="noopener" style="color:var(--acc)">esphome-samsung-nasa</a>')}</div>
+    <a class="act" href="samsung-wp-nasa.yaml" download style="text-decoration:none"><span class="ic">${IC.dl}</span><span>ESPHome-YAML herunterladen<small>Alternative zu EHS Sentinel: ESP32 + RS485 an F1/F2 – Namen nicht ändern</small></span></a>
   </div>`;
 
   // Spalte 2: Schnittstelle
@@ -366,10 +389,9 @@ function render(){
       ${L.tab==='log'?chip(false,'Leeren',()=>confirmDo('Protokoll leeren','Alle aufgezeichneten Meldungen löschen?',()=>send({type:WS+'clear_logs'}).then(refreshLog))):''}
     </div><div class="lbody" id="lbody">${lb}</div></div></div>`;
 
-  const ents = ehsEntities();
   const tabBtn = (k,ic,l,cnt) => `<button class="${st.tab===k?'on':''}" data-a="${act(()=>setTab(k))}">${IC[ic]}${l}${cnt!=null?`<span class="cnt">${cnt}</span>`:''}</button>`;
   const nSet = ents.filter(e=>EDIT[e.dom]).length, nMes = ents.length - nSet;
-  const tabs = `<div class="tabs" role="tablist">${tabBtn('over','info','Übersicht')}${tabBtn('set','chip','Einstellungen',nSet)}${tabBtn('mes','pulse','Messwerte',nMes)}${tabBtn('ent','link','Zuordnung',st.cat?st.cat.length:null)}${tabBtn('log','list','Protokoll')}</div>`;
+  const tabs = `<div class="tabs" role="tablist">${tabBtn('over','info','Übersicht')}${tabBtn('set','chip','Einstellungen',nSet)}${tabBtn('mes','pulse','Messwerte',nMes)}${tabBtn('ent','link','Zuordnung',(st.map.src==='all'&&st.repo)?st.repo.length:(st.cat?st.cat.length:null))}${tabBtn('log','list','Protokoll')}</div>`;
   const body = st.tab==='set' ? cardsHtml(ents,'set') : st.tab==='mes' ? cardsHtml(ents,'mes') : st.tab==='ent' ? (st.map.view==='raw' ? `<button class="back" data-a="${act(()=>{ st.map.view='areas'; render(); })}">‹ Entitäten-Zuordnung</button>`+entHtml(ents) : mapHtml(ents)) : st.tab==='log' ? log : `<div class="grid">${c1}${c2}${c3}</div>`;
   const lbOld = $('#lbody'), scroll = lbOld ? lbOld.scrollTop : 0;
   const ewOld = $('#ewrap'), escroll = ewOld ? ewOld.scrollTop : 0;
@@ -394,11 +416,18 @@ function bind(){
 
 /* ---------- Entitäten (wie EMS-ESP Manager) ---------- */
 function setTab(k){ st.tab=k; try{ sessionStorage.setItem('ehsm_tab',k); }catch(e){} if(k==='log'){ st.log.data=null; refreshLog(); } else render(); }
+const OBJ_BY_ID = {};
+function espObj(id, s){
+  if(!st.esp) return null; const fn = String(s.attributes.friendly_name||'').toLowerCase();
+  for(const [n,o] of Object.entries(st.espByName)) if(fn===n || fn.endsWith(' '+n)) return o;
+  return null;
+}
 function ehsEntities(){
   const reg = hass.entities || {}, out = [];
   for(const [id,s] of Object.entries(hass.states)){
     const r = reg[id];
-    const mine = r ? r.platform==='ehs_sentinel' : /ehssentinel/.test(id);
+    let mine = r ? r.platform==='ehs_sentinel' : /ehssentinel/.test(id);
+    if(!mine && (!r || r.platform==='esphome') && !/ehssentinel/.test(id)){ const o = OBJ_BY_ID[id] || espObj(id, s); if(o){ OBJ_BY_ID[id]=o; mine=true; } }
     if(!mine) continue;
     if(st.sel && r && r.config_entry_id && st.status && st.status.instances.length>1 && r.config_entry_id!==st.sel) continue;
     out.push({id, s, dom:id.split('.')[0], name:s.attributes.friendly_name||id});
@@ -490,22 +519,26 @@ const MI = {
   wave:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M2 12c3-8 5-8 7 0s4 8 7 0 4-8 6-4"/></svg>',
   flow:'<svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 3s-6 7-6 11a6 6 0 0 0 12 0c0-4-6-11-6-11z"/></svg>',
 };
-const objOf = id => (id.split('.')[1]||'').replace(/^.*?ehssentinel_/,'');
+const objOf = id => OBJ_BY_ID[id] || (id.split('.')[1]||'').replace(/^.*?ehssentinel_/,'');
 function grpOf(e, kind){
-  const o = objOf(e.id);
+  const o = objOf(e.id), rp = st.repoBy[o];
+  if(rp && kind==='mes' && !/^FSV/.test(rp.g)) return rp.g;
+  if(rp && kind==='set' && /^FSV/.test(rp.g)) return rp.g;
   if(kind==='set'){ const m=o.match(/^infsv(\d)/); return m ? ({1:'FSV 10xx · Grenzwerte',2:'FSV 20xx · Heizkurve',3:'FSV 30xx · Warmwasser',4:'FSV 40xx · Heizung & Zuheizer',5:'FSV 50xx · Sonstiges'})[m[1]]||'FSV' : 'Betrieb'; }
   if(/^ehssentinel/.test(o)) return 'EHS Sentinel (berechnet)';
   if(/^(outdoor|out)/.test(o)) return 'Außengerät';
   if(/^(indoor|in|dhw|currenttemp|control|power|zone)/.test(o)) return 'Innengerät';
   return 'Weitere';
 }
-const GORD = ['Betrieb','FSV 10xx · Grenzwerte','FSV 20xx · Heizkurve','FSV 30xx · Warmwasser','FSV 40xx · Heizung & Zuheizer','FSV 50xx · Sonstiges','FSV','Innengerät','Außengerät','EHS Sentinel (berechnet)','Weitere'];
+const GORD = ['Betrieb','Innengerät','Außengerät','FSV 10xx · Grenzwerte','FSV 20xx · Heizkurve','FSV 30xx · Warmwasser','FSV 40xx · Heizung & Zuheizer','FSV 50xx · Sonstiges','FSV','Innengerät','Außengerät','EHS Sentinel (berechnet)','Weitere'];
 function labelOf(e){
-  const o = objOf(e.id);
+  const o = objOf(e.id), rp = st.repoBy[o];
+  if(rp && rp.l && (!labelOf.dup || labelOf.dup[rp.l]===1)) return rp.l;
   if(st.cat){
     if(!labelOf.dup){ labelOf.dup={}; st.cat.forEach(f=>labelOf.dup[f.label]=(labelOf.dup[f.label]||0)+1); }
     const f = st.cat.find(f=>objOf(f.target)===o); if(f && labelOf.dup[f.label]===1) return f.label; }
-  const fsv = o.match(/^infsv(\d{4})$/); if(fsv) return 'FSV '+fsv[1];
+  const fsv = o.match(/^infsv(\d{4})$/); if(fsv) return 'FSV '+fsv[1]+(rp&&rp.desc?' · '+rp.desc:'');
+  if(rp && rp.desc) return rp.desc;
   const n = String(e.name).replace(/^.*?ehssentinel[ _]/i,'').replace(/([a-z])([A-Z0-9])/g,'$1 $2').replace(/_/g,' ');
   return n.charAt(0).toUpperCase()+n.slice(1);
 }
@@ -543,7 +576,8 @@ function cardsHtml(ents, kind){
       if(kind==='set' && e.dom==='select') return `<div class="mr ${unav?'unav':''}"><span class="ico">${icoOf(e)}</span><div class="sbox"><label>${esc(l)}</label><select data-eid="${esc(e.id)}" ${unav?'disabled':''} aria-label="${esc(l)}">${(e.s.attributes.options||[]).map(o=>`<option value="${esc(o)}" ${o===e.s.state?'selected':''}>${esc(o)}</option>`).join('')}${(e.s.attributes.options||[]).includes(e.s.state)?'':`<option selected disabled>${esc(e.s.state)}</option>`}</select></div></div>`;
       const right = kind==='set' ? setCtl(e,l) : `<span class="vl" title="${esc(valTxt(e))}">${esc(valTxt(e))}</span>`;
       const on = e.dom==='switch' && e.s.state==='on';
-      return `<div class="mr ${unav?'unav':''}"><span class="ico ${on?'on':''}">${icoOf(e)}</span><span class="nm">${esc(l)}<small>${esc(e.id)}</small></span>${right}</div>`;
+      const rp = st.repoBy[objOf(e.id)];
+      return `<div class="mr ${unav?'unav':''}"><span class="ico ${on?'on':''}">${icoOf(e)}</span><span class="nm" title="${esc(rp?rp.k+(rp.desc?' – '+rp.desc:''):'')}">${esc(l)}<small>${esc(e.id)}</small></span>${right}</div>`;
     }).join('')}</div>`).join('');
   return `<div class="mtop"><input type="search" id="cq" placeholder="${kind==='set'?'Einstellung':'Messwert'} suchen …" value="${esc(st.cq||'')}" aria-label="Suchen"><span>${list.length} ${kind==='set'?'Einstellungen':'Messwerte'}</span></div>
     ${kind==='set' && wm && wm.write_mode===false ? `<div class="msg info" style="margin:0 0 16px">Schreibmodus ist aus – Einstellungen erscheinen dann nur unter Messwerte. Einschalten unter Übersicht → Schnittstelle.</div>`:''}
@@ -555,10 +589,16 @@ function cardsBind(){
 }
 
 /* ---------- Entitäten-Zuordnung (wie EMS-ESP Manager) ---------- */
+function prettyKey(k){ const t=String(k).replace(/^(ENUM|VAR|LVAR|STR|NASA)_/,'').toLowerCase().replace(/_/g,' '); return t.charAt(0).toUpperCase()+t.slice(1); }
 const BAD = v => v==null || v==='unavailable' || v==='unknown';
 const STL = {all:'Alle', found:'Gefunden', missing:'Fehlt in HA', nodata:'Nicht geliefert'};
 async function loadMapData(){
   try{ const r = await fetch('ehs-functions.json?v='+Date.now()); st.cat = (await r.json()).functions || []; }catch(e){ st.cat = []; }
+  try{ const r = await fetch('ehs-esphome.json?v='+Date.now()); st.esp = (await r.json()).map||{};
+       for(const [o,v] of Object.entries(st.esp)) st.espByName[v.n.toLowerCase()] = o; }catch(e){ st.esp = {}; }
+  try{ const r = await fetch('ehs-repo.json?v='+Date.now()); const j = await r.json(); st.repoSrc = j.source||'';
+       st.repo = (j.entities||[]).map(e=>({label: e.l || e.desc || prettyKey(e.k), area:e.g, target:(e.w||e.d)+'.samsung_ehssentinel_'+e.o, ids:[], repo:e}));
+       st.repo.forEach(f=>st.repoBy[f.repo.o]=f.repo); }catch(e){ st.repo = []; }
   try{ const r = await send({type:WS+'panel/get'}); st.pmap = r.map||{}; st.pmapAdmin = !!r.is_admin; }
   catch(e){ try{ st.pmap = JSON.parse(localStorage.getItem('ehs800.map')||'{}'); }catch(_){ st.pmap = {}; } }
 }
@@ -567,7 +607,9 @@ function resolveT(t, ents){
   const dom = t.split('.')[0], obj = (t.split('.')[1]||''), suf = 'ehssentinel_'+obj.replace(/^.*?ehssentinel_/,'');
   const c = ents.filter(e=>{ const o=e.id.split('.')[1]; return o===suf || o.endsWith('_'+suf); });
   c.sort((a,b)=>(BAD(a.s.state)-BAD(b.s.state)) || ((a.dom!==dom)-(b.dom!==dom)));
-  return c.length ? c[0].id : (cur ? t : null);
+  if(c.length) return c[0].id;
+  const o2 = obj.replace(/^.*?ehssentinel_/,''); const esp = ents.filter(e=>OBJ_BY_ID[e.id]===o2).sort((a,b)=>BAD(a.s.state)-BAD(b.s.state));
+  return esp.length ? esp[0].id : (cur ? t : null);
 }
 function fnInfo(f, ents){
   const ov = f.ids.map(i=>st.pmap[i]).find(Boolean);
@@ -576,21 +618,30 @@ function fnInfo(f, ents){
   const v = st.map.verify; const vm = !v || !r ? null : v.answered.has(r) ? 'y' : v.missing.has(r) ? 'n' : null;
   return {f, t, r, s, status, over:!!ov, vm};
 }
+function espSet(){
+  if(!st.esp) return [];
+  if(!espSet.c) espSet.c = Object.entries(st.esp).map(([o,v])=>{ const rp=st.repoBy[o];
+    return {label:v.n, area:rp?rp.g:'ESPHome', target:v.d+'.samsung_ehssentinel_'+o, ids:[], repo:rp?Object.assign({},rp,{esp:v}):{k:v.c,o,d:v.d,w:null,desc:'',u:'',r:'',g:'ESPHome',esp:v}}; });
+  return espSet.c;
+}
+function curSet(){ return st.map.src==='panel' ? (st.cat||[]) : st.map.src==='esp' ? espSet() : (st.repo||[]); }
 function mapHtml(ents){
-  if(!st.cat) return `<div class="empty">Lade Funktionsliste …</div>`;
-  const M = st.map, all = st.cat.map(f=>fnInfo(f, ents));
+  if(!st.cat || !st.repo) return `<div class="empty">Lade Funktionsliste …</div>`;
+  const M = st.map, all = curSet().map(f=>fnInfo(f, ents));
   const cnt = k => k==='all' ? all.length : all.filter(x=>x.status===k).length;
   const q = M.q.trim().toLowerCase();
   const pass = x => (M.f==='all' || x.status===M.f) && (!q || (x.f.label+' '+(x.r||x.t)+' '+x.f.area).toLowerCase().includes(q));
   const sumBtn = (k,cls) => `<button class="${cls} ${M.f===k?'on':''}" data-a="${act(()=>{ M.f=k; render(); })}"><b>${cnt(k)}</b>${STL[k]}</button>`;
   const v = M.verify;
-  const vres = M.verifying ? `<div class="res" style="color:var(--dim)">Werte werden bei der Wärmepumpe angefragt … (bis zu 20 s)</div>`
-    : v ? `<div class="res"><span style="color:var(--ok)">✓ ${v.answered.size} antworten</span> · <span style="color:var(--warn)">✗ ${v.missing.size} ohne Antwort</span>${v.noKey?` · ${v.noKey} nicht anfragbar`:''} <span style="color:var(--dim)">(${v.time})</span>${v.errors.length?`<br><span style="color:var(--err)">${esc(v.errors.join(' '))}</span>`:''}</div>` : '';
+  const vres = M.verifying ? `<div class="res" style="color:var(--dim)">Werte werden bei der Wärmepumpe angefragt … (bis zu ${curSet().length>250?90:25} s)</div>`
+    : M.verifying===undefined ? '' : v ? `<div class="res"><span style="color:var(--ok)">✓ ${v.answered.size} antworten</span> · <span style="color:var(--warn)">✗ ${v.missing.size} ohne Antwort</span>${v.noKey?` · ${v.noKey} nicht anfragbar`:''} <span style="color:var(--dim)">(${v.time})</span>${v.errors.length?`<br><span style="color:var(--err)">${esc(v.errors.join(' '))}</span>`:''}</div>` : '';
+  const seg = (k,l,n) => `<button class="chip ${M.src===k?'on':''}" data-a="${act(()=>{ M.src=k; M.view='areas'; M.verify=null; render(); })}">${l} · ${n}</button>`;
   let html = `<div class="mapw"><h1>Entitäten-Zuordnung</h1><div class="bar"></div>
+    <div style="display:flex;gap:8px;justify-content:center;margin:-4px 0 14px;flex-wrap:wrap">${seg('all','Alle EHS-Sentinel-Werte',st.repo.length)}${seg('esp','ESPHome (Beormund)',Object.keys(st.esp||{}).length)}${seg('panel','Panel-Funktionen',st.cat.length)}</div>
     <div class="sum">${sumBtn('all','')}${sumBtn('found','g')}${sumBtn('missing','m')}${sumBtn('nodata','x')}</div>
     <div class="card vcard"><div class="tx"><b>Werte prüfen</b><span>Fragt alle Werte direkt bei der Wärmepumpe ab und prüft, ob Home Assistant sie erhält. Es wird nichts verändert.</span>${vres}</div>
       <button class="btn pri big" data-a="${act(runVerify)}" ${M.verifying?'disabled':''}>${M.verifying?'Prüfe …':'Prüfen'}</button></div>`;
-  if(M.view==='pick') return html.replace('<h1>Entitäten-Zuordnung</h1><div class="bar"></div>','<h1>Zuordnen</h1><div class="bar"></div>').split('<div class="sum">')[0] + pickHtml(ents, all) + `</div>`;
+  if(M.view==='pick') return pickHtml(ents, all);
   if(M.view==='area' && !q){
     const rows = all.filter(x=>x.f.area===M.area && pass(x));
     html += `<button class="back" data-a="${act(()=>{ M.view='areas'; render(); })}">‹ Bereiche</button>
@@ -601,7 +652,8 @@ function mapHtml(ents){
       const rows = all.filter(pass);
       html += `<div class="sect">Treffer · ${rows.length}</div><div class="card">${rows.map(fnRow).join('') || '<div class="empty">Nichts gefunden.</div>'}</div>`;
     } else {
-      const areas = [...new Set(st.cat.map(f=>f.area))];
+      const AO = ['Heizung','Warmwasser','Wärmepumpe','Innengerät','Außengerät','FSV 10xx · Grenzwerte','FSV 20xx · Heizkurve','FSV 30xx · Warmwasser','FSV 40xx · Heizung & Zuheizer','FSV 50xx · Sonstiges','EHS Sentinel (berechnet)'];
+      const areas = [...new Set(curSet().map(f=>f.area))].sort((a,b)=>(AO.indexOf(a)+1||99)-(AO.indexOf(b)+1||99));
       const rows = areas.map(a=>{ const it = all.filter(x=>x.f.area===a); if(!it.some(pass)) return '';
         const g=it.filter(x=>x.status==='found').length, m=it.filter(x=>x.status==='missing').length, n=it.filter(x=>x.status==='nodata').length;
         const vn = v ? it.filter(x=>x.vm==='n').length : 0;
@@ -611,7 +663,7 @@ function mapHtml(ents){
       html += `<div class="sect">Bereiche · ${esc(STL[M.f])}</div><div class="alist">${rows || '<div class="empty">Keine Bereiche in diesem Filter.</div>'}</div>`;
     }
   }
-  html += `<div class="expl"><b>Fehlt in HA</b> – das Panel nutzt die Funktion, aber Home Assistant hat keine passende Entität von EHS Sentinel. Antippen und zuordnen.<br>
+  html += `<div class="expl">${M.src==='esp'?`<b>ESPHome (Beormund/esphome-samsung-nasa)</b> – alle ${Object.keys(st.esp).length} Werte der mitgelieferten ESPHome-Konfiguration. Das Panel erkennt sie am Namen. <a href="samsung-wp-nasa.yaml" download style="color:var(--acc)">YAML herunterladen</a><br>`:''}${M.src==='all'?`<b>Alle EHS-Sentinel-Werte</b> – vollständige Liste aller ${st.repo.length} Werte, die die Integration laut GitHub (${esc(st.repoSrc)}) bereitstellen kann, gruppiert nach Gerät und FSV.<br>`:''}<b>Fehlt in HA</b> – ${M.src==='all'?'die Integration kennt den Wert, Home Assistant hat aber keine Entität dazu (deaktiviert oder gelöscht).':'das Panel nutzt die Funktion, aber Home Assistant hat keine passende Entität von EHS Sentinel. Antippen und zuordnen.'}<br>
     <b>Nicht geliefert</b> – die Entität existiert, die Wärmepumpe liefert aber keinen Wert (z. B. Zone 2, Zubehör). Das Panel blendet sie aus, hier ist nichts zu tun.<br>
     <b>Werte prüfen</b> – „ohne Antwort“ heißt: die WP hat auf die Anfrage nicht reagiert (Funktion bei diesem Modell nicht vorhanden oder Verbindung gestört).<br>
     Eigene Zuordnungen werden in Home Assistant gespeichert und gelten für das Samsung-Panel in jedem Browser.</div>
@@ -622,20 +674,58 @@ function fnRow(x){
   const e = x.r ? {id:x.r, s:x.s, dom:x.r.split('.')[0], name:x.f.label} : null;
   const pill = x.status==='found' ? '<span class="pill ok">Gefunden</span>' : x.status==='missing' ? '<span class="pill no">Fehlt in HA</span>' : '<span class="pill dm" style="color:var(--dim);background:var(--card2)">Nicht geliefert</span>';
   const vm = x.vm==='y' ? '<span class="vm y">✓ antwortet</span>' : x.vm==='n' ? '<span class="vm n">✗ keine Antwort</span>' : '';
-  return `<div class="fr"><div class="tx"><b>${esc(x.f.label)}</b><small>${x.r?esc(x.r):'keine Entität · erwartet '+esc(x.t)}${x.over?' · eigene Zuordnung':''}</small></div>
+  return `<div class="fr"><div class="tx"><b>${esc(x.f.label)}</b><small>${x.f.repo?esc(x.f.repo.k)+' · ':''}${x.r?esc(x.r):'keine Entität · erwartet '+esc(x.t)}${x.over?' · eigene Zuordnung':''}</small></div>
     <div class="st">${pill}${vm}</div>
     <div class="c">${e && x.status==='found' && EDIT[e.dom] ? ctrlHtml(e) : `<div class="val">${e?esc(valTxt(e)):'–'}</div>`}</div>
-    <button class="lnk" data-a="${act(()=>{ st.map.pick=x.f; st.map.pq=''; st.map.view='pick'; render(); })}">${x.status==='missing'?'Zuordnen':'Ändern'}</button></div>`;
+    <button class="lnk" data-a="${act(()=>{ st.map.pick=x.f; st.map.pv=(x.over?x.t:(x.r||x.t)); st.map.pres=null; st.map.view='pick'; render(); })}">${x.f.repo?'Details':x.status==='missing'?'Zuordnen':'Ändern'}</button></div>`;
 }
 function pickHtml(ents, all){
-  const M = st.map, f = M.pick, x = all.find(y=>y.f===f) || fnInfo(f, ents), q = M.pq.trim().toLowerCase();
-  const list = ents.filter(e=>!q || (e.name+' '+e.id).toLowerCase().includes(q)).slice(0,300);
-  return `<button class="back" data-a="${act(()=>{ M.view = M.area?'area':'areas'; render(); })}">‹ Zurück</button>
-    <div class="card pad"><b style="font-size:18px;font-weight:400">${esc(f.label)}</b><div style="color:var(--dim);font-size:13.5px;margin-top:4px">
-      Bereich: ${esc(f.area)} · Standard: <code>${esc(f.target)}</code><br>Aktuell: ${x.r?`<code>${esc(x.r)}</code>`:'keine Entität'}${x.over?' (eigene Zuordnung)':''}</div>
-      ${x.over?`<div style="margin-top:10px"><button class="btn" data-a="${act(()=>saveMapFor(f,null))}">Standard wiederherstellen</button></div>`:''}</div>
-    <input type="search" class="msearch" id="pq" placeholder="EHS-Sentinel-Entität suchen …" value="${esc(M.pq)}" aria-label="Entität suchen">
-    <div class="card">${list.map(e=>`<div class="pk2" data-a="${act(()=>saveMapFor(f,e.id))}" role="button" tabindex="0"><div>${esc(e.name)}<small>${esc(e.id)}</small></div><div class="val" style="white-space:nowrap">${esc(valTxt(e))}</div></div>`).join('') || '<div class="empty">Keine Entität gefunden.</div>'}</div>`;
+  const M = st.map, f = M.pick, x = all.find(y=>y.f===f) || fnInfo(f, ents);
+  const v = (M.pv||'').trim(), es = hass.states[v];
+  const pill = x.status==='found' ? '<span class="pill ok">gefunden</span>' : x.status==='missing' ? '<span class="pill no">fehlt in HA</span>' : '<span class="pill" style="background:var(--card2);color:var(--dim)">nicht geliefert</span>';
+  const writable = /^(number|select|switch)\./.test(v);
+  const r = M.pres;
+  const line = (ok,t) => `<div style="color:${ok===true?'var(--ok)':ok===false?'var(--err)':'var(--dim)'}">${ok===true?'✓':ok===false?'✗':'–'} ${esc(t)}</div>`;
+  const pres = M.checking ? `<div class="pres" style="color:var(--dim)">Prüfe … (bis zu 30 s)</div>`
+    : r ? `<div class="pres">${line(r.read, r.readT)}${r.write!==undefined?line(r.write, r.writeT):''}</div>` : '';
+  const back = () => { M.view = M.area?'area':'areas'; render(); };
+  return `<div class="pick">
+    <div class="hd"><button data-a="${act(back)}" aria-label="Zurück"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M9 14L4 9l5-5"/><path d="M4 9h10a6 6 0 0 1 0 12h-3"/></svg></button><h1>Zuordnung</h1><span></span></div>
+    <div class="bar"></div>
+    <div class="lb">Funktion</div><div class="fn">${esc(f.label)} ${pill}</div>
+    ${f.repo && f.repo.esp ? `<div class="lb">ESPHome</div><div class="std">${f.repo.esp.f?'fsv: '+esc(f.repo.esp.f):'message: '+esc(f.repo.esp.c)} · ${esc(f.repo.esp.d)} · Name „${esc(f.repo.esp.n)}“</div>`:''}
+    ${f.repo ? `<div class="lb">NASA-Wert</div><div class="std">${esc(f.repo.k)}${f.repo.u?' · Einheit '+esc(f.repo.u):''} · ${f.repo.w?'einstellbar ('+esc(f.repo.w)+')':'nur lesen ('+esc(f.repo.d)+')'}</div>
+      ${f.repo.desc?`<div class="lb">Beschreibung (GitHub)</div><div class="std" style="font-size:15.5px">${esc(f.repo.desc)}${f.repo.r?`<br><span style="color:var(--dim)">${esc(f.repo.r)}</span>`:''}</div>`:''}
+      <div class="lb">Entität in Home Assistant</div><div class="std">${x.r?esc(x.r)+' · '+esc(valTxt({id:x.r,s:x.s,dom:x.r.split('.')[0]})):'<span style="color:var(--err)">keine – erwartet '+esc(f.target)+'</span>'}</div>`
+    : `<div class="lb">Standard (EHS Sentinel)</div><div class="std">${esc(f.target)}</div>`}
+    <div class="lb">Prüfung</div>
+    <div class="pcard"><div class="tx"><b>${writable?'Lesen &amp; Schreiben prüfen':'Lesen prüfen'}</b><span>Es wird nichts verändert.${writable?' Der aktuelle Wert wird unverändert erneut gesendet.':''}</span>${pres}</div>
+      <button class="btn pri big" data-a="${act(()=>checkOne(v))}" ${M.checking||!es?'disabled':''}>Prüfen</button></div>
+    ${f.repo ? `<div class="bb3" style="grid-template-columns:1fr"><button data-a="${act(back)}">Zurück</button></div></div>` : `<div class="lb">Deine Entität</div>
+    <input class="ein" id="pv" list="ehsents" value="${esc(M.pv||'')}" spellcheck="false" autocomplete="off" aria-label="Deine Entität">
+    <datalist id="ehsents">${ents.map(e=>`<option value="${esc(e.id)}">${esc(e.name)}</option>`).join('')}</datalist>
+    <div class="hint" id="pvh">${!v?'Leer = Standard verwenden':es?`Vorhanden · aktueller Wert: ${esc(valTxt({id:v,s:es,dom:v.split('.')[0]}))}`:'<span style="color:var(--warn)">Diese Entität gibt es in Home Assistant nicht.</span>'}</div>
+    <div class="bb3">
+      <button data-a="${act(()=>saveMapFor(f,null))}">Standard</button>
+      <button data-a="${act(back)}">Abbrechen</button>
+      <button class="pri" data-a="${act(()=>{ const val=(M.pv||'').trim(); if(!val) return saveMapFor(f,null); if(!hass.states[val]) return confirmDo('Entität nicht gefunden',`„${val}“ gibt es in Home Assistant nicht. Trotzdem speichern?`,()=>saveMapFor(f,val)); saveMapFor(f, val===f.target?null:val); })}">Speichern</button>
+    </div></div>`}`;
+}
+async function checkOne(eid){
+  const M = st.map; if(!eid || !hass.states[eid]) return;
+  M.checking = true; M.pres = null; render();
+  const r = {};
+  try{ const v = await send({type:WS+'verify', entity_ids:[eid], timeout:12});
+       if(v.answered.includes(eid)){ r.read=true; r.readT='Lesen: Wärmepumpe antwortet ('+valTxt({id:eid,s:hass.states[eid],dom:eid.split('.')[0]})+')'; }
+       else if(v.no_key.includes(eid)){ r.read=null; r.readT='Lesen: nicht anfragbar (keine EHS-Sentinel-Entität)'; }
+       else { r.read=false; r.readT='Lesen: keine Antwort der Wärmepumpe'+(v.errors&&v.errors.length?' – '+v.errors.join(' '):''); } }
+  catch(e){ r.read=false; r.readT='Lesen: '+errText(e); }
+  if(/^(number|select|switch)\./.test(eid)){
+    try{ const w = await send({type:WS+'verify_write', entity_id:eid});
+         r.write = w.ok; r.writeT = 'Schreiben: '+(w.ok ? 'von der Wärmepumpe bestätigt' : (w.error||w.text||'nicht bestätigt')); }
+    catch(e){ r.write=false; r.writeT='Schreiben: '+errText(e); }
+  }
+  M.pres = r; M.checking = false; render();
 }
 async function saveMapFor(f, eid){
   const m = {...st.pmap}; for(const id of f.ids){ if(eid) m[id]=eid; else delete m[id]; }
@@ -645,15 +735,17 @@ async function saveMapFor(f, eid){
 }
 async function runVerify(){
   const M = st.map, ents = ehsEntities(); if(!st.cat) return;
-  const ids = [...new Set(st.cat.map(f=>fnInfo(f, ents).r).filter(Boolean))];
+  const ids = [...new Set(curSet().map(f=>fnInfo(f, ents).r).filter(Boolean))];
   M.verifying = true; render();
-  try{ const r = await send({type:WS+'verify', entity_ids:ids, entry_id:st.sel||undefined, timeout:20});
+  try{ const r = await send({type:WS+'verify', entity_ids:ids, entry_id:st.sel||undefined, timeout: ids.length>250 ? 90 : 25});
        M.verify = {answered:new Set(r.answered), missing:new Set(r.missing), noKey:(r.no_key||[]).length, errors:r.errors||[], time:new Date().toLocaleTimeString('de-DE',{hour:'2-digit',minute:'2-digit'})}; }
   catch(e){ toast(errText(e)); }
   M.verifying = false; render();
 }
 function mapBind(){
   const q = $('#mq'); if(q) q.addEventListener('input',()=>{ st.map.q=q.value; clearTimeout(mapBind._t); mapBind._t=setTimeout(()=>{ render(); const n=$('#mq'); if(n){ n.focus(); n.setSelectionRange(n.value.length,n.value.length); } },250); });
+  const pv = $('#pv'); if(pv) pv.addEventListener('input',()=>{ st.map.pv = pv.value; st.map.pres=null; const v=pv.value.trim(), es=hass.states[v], h=$('#pvh');
+    if(h) h.innerHTML = !v?'Leer = Standard verwenden':es?`Vorhanden · aktueller Wert: ${esc(valTxt({id:v,s:es,dom:v.split('.')[0]}))}`:'<span style="color:var(--warn)">Diese Entität gibt es in Home Assistant nicht.</span>'; });
   const p = $('#pq'); if(p) p.addEventListener('input',()=>{ st.map.pq=p.value; clearTimeout(mapBind._t); mapBind._t=setTimeout(()=>{ render(); const n=$('#pq'); if(n){ n.focus(); n.setSelectionRange(n.value.length,n.value.length); } },250); });
   document.querySelectorAll('.ar[data-a],.pk2[data-a]').forEach(el=>el.addEventListener('keydown',ev=>{ if(ev.key==='Enter'||ev.key===' '){ ev.preventDefault(); el.click(); } }));
 }
