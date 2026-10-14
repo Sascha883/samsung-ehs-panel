@@ -7,7 +7,8 @@
         "data": {
           "sidebar_title": "Titel in der Seitenleiste",
           "sidebar_icon": "Symbol",
-          "require_admin": "Nur für Administratoren"
+          "require_admin": "Nur für Administratoren",
+          "show_manager": "Verwaltungsseite „EHS Sentinel“ anzeigen (Admins)"
         }
       }
     },
@@ -22,7 +23,8 @@
         "data": {
           "sidebar_title": "Titel in der Seitenleiste",
           "sidebar_icon": "Symbol",
-          "require_admin": "Nur für Administratoren"
+          "require_admin": "Nur für Administratoren",
+          "show_manager": "Verwaltungsseite „EHS Sentinel“ anzeigen (Admins)"
         }
       }
     }

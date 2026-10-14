@@ -12,9 +12,11 @@ from homeassistant.helpers import selector
 from .const import (
     CONF_ADMIN,
     CONF_ICON,
+    CONF_MANAGER,
     CONF_TITLE,
     DEFAULT_ADMIN,
     DEFAULT_ICON,
+    DEFAULT_MANAGER,
     DEFAULT_TITLE,
     DOMAIN,
 )
@@ -26,6 +28,7 @@ def _schema(defaults: dict[str, Any]) -> vol.Schema:
             vol.Required(CONF_TITLE, default=defaults.get(CONF_TITLE, DEFAULT_TITLE)): str,
             vol.Required(CONF_ICON, default=defaults.get(CONF_ICON, DEFAULT_ICON)): selector.IconSelector(),
             vol.Required(CONF_ADMIN, default=defaults.get(CONF_ADMIN, DEFAULT_ADMIN)): bool,
+            vol.Required(CONF_MANAGER, default=defaults.get(CONF_MANAGER, DEFAULT_MANAGER)): bool,
         }
     )
 

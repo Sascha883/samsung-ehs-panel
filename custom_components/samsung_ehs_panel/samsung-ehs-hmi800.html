@@ -40,7 +40,7 @@
   /* Samsung-Bedienteil: helles Display, Samsung-Blau als Akzent */
   --bg:#f5f7fa; --txt:#2b2f36; --dim:#6b7380; --dim2:#9aa1ab; --sep:#e1e5eb; --line:#d5dae1;
   --acc:#3a95e6; --ok:#2e9d5b; --warn:#d98a00; --err:#e0453a; --hl:#e8edf4;
-  --red:#e0573b; --blue:#3a95e6; --teal:#2a9d8f; --frame:#dfe3e8;
+  --red:#e0573b; --blue:#3a95e6; --teal:#2a9d8f; --frame:#f5f7fa;
   --rainbow:linear-gradient(90deg,#3a95e6 0%,#1f6fc0 100%);
 }
 *{box-sizing:border-box;-webkit-tap-highlight-color:transparent;user-select:none}
@@ -82,6 +82,12 @@ svg{overflow:visible}
 .tile.bw .sub{border-top-color:rgba(255,255,255,.55)}
 .tile.bw:active{filter:brightness(.95)}
 .slot .tile.zone + .tile::before,.slot .tile.bw + .tile::before{display:none}
+.tile.card{background:linear-gradient(180deg,#fff,#eef1f5);border-radius:6px;box-shadow:inset 0 0 0 1px var(--line);margin:8px 10px}
+.tile.card:active{background:#e6edf6}
+.tile.card .big{color:var(--acc)}
+.slot .tile.card + .tile::before,.slot + .slot::before{display:none}
+.homep .tile.card{margin:6px 10px}
+.prow .tile.card + .tile.card{border-left:none}
 .homeline{position:absolute;left:66px;right:66px;top:400px;height:1px;background:var(--line)}
 .arr{position:absolute;top:110px;width:48px;height:80px;display:flex;align-items:center;justify-content:center;cursor:pointer;z-index:5}
 .arr svg{width:24px;height:42px}
@@ -369,7 +375,7 @@ const ENTITY_OVERRIDES = Object.assign({}, SAMSUNG_MAP, {
 const INSTALLER = { name:"Sascha Matheis Haustechnik", addr:"Segelbreite 27, 34314 Espenau", tel:"" };
 const HEATING_CIRCUITS = [1,2,3,4];  // werden nur angezeigt, wenn thermostat_hcX_* existiert
 const SERVICE_PIN = "";               // leer = Servicemenü ohne PIN, z.B. "1234"
-const PANEL_VERSION = "1.1.3";   // bei jeder neuen Version erhöhen (Upload im EMS-ESP Manager)
+const PANEL_VERSION = "1.2.0";   // bei jeder neuen Version erhöhen (Upload im EMS-ESP Manager)
 
 // Vom EMS-ESP Manager beim Ausliefern gesetzt (nicht von Hand eintragen)
 const MGR = window.EMS_ESP_MANAGER || null;
@@ -905,7 +911,7 @@ const MENUS = {
     RO(F('sensor','outerrorcode'),'Fehlercode Außengerät'),
     RO(F('sensor','errorcode2'),'Fehlercode 2',{adv:true}), RO(F('sensor','errorcode3'),'Fehlercode 3',{adv:true}),
     RO(F('sensor','errorcode4'),'Fehlercode 4',{adv:true}), RO(F('sensor','errorcode5'),'Fehlercode 5',{adv:true}),
-    TXT('0 = keine Störung. Bedeutung der Codes laut Samsung-Servicehandbuch; Quittieren am Samsung-Bedienteil.'),
+    TXT('0 und -1 = keine Störung. Bedeutung der Codes laut Samsung-Servicehandbuch; Quittieren am Samsung-Bedienteil.'),
   ]},
   s_info: { title:'Info', svc:true, items:[
     NAV('Energie – Details','energylist'),
@@ -1140,7 +1146,7 @@ function header(title, o={}){
 }
 function statusIcon(){
   const e = String(st('sensor.thermostat_errorcode')||'').trim();
-  const ok = !e || /^(-|0|none|unknown|unavailable|kein.*|-\s*\(0\)|.*\(0\))$/i.test(e);
+  const ok = !e || [0,-1].includes(parseFloat(e)) || /^(-|0|none|unknown|unavailable|kein.*|-\s*\(0\)|.*\(0\))$/i.test(e);
   return ok ? I.ok : I.warn(/^[A-Z]\d|\bA\d/.test(e)?'#e0453a':'#d98a00');
 }
 function tempTxt(id,dec){ const v=nv(id); return v==null?'–':fmtN(v,dec==null?0:dec)+'°'; }
@@ -1168,11 +1174,11 @@ document.addEventListener('click',ev=>{
 
 /* ---------- Startseite ---------- */
 function homeSlots(){
-  const hcTiles = HEATING_CIRCUITS.filter(hcExists).map(n=>({html:tileHC(n), act:()=>push({type:'hc',n}), big:true, cls:SAM_MODE?'zone':''}));
+  const hcTiles = HEATING_CIRCUITS.filter(hcExists).map(n=>({html:tileHC(n), act:()=>push({type:'hc',n}), big:true}));
   return [
     {html:tileWP(), act:()=>push({type:'ov'}), big:true},
     ...hcTiles,
-    {html:tileDHW(), act:()=>push({type:'dhwp'}), big:true, cls:SAM_MODE?'bw':''},
+    {html:tileDHW(), act:()=>push({type:'dhwp'}), big:true},
     {col:[ {html:`${ico(on('switch.thermostat_absent')?I.away:I.present,34)}<div class="lbl" style="margin-top:12px">${on('switch.thermostat_absent')?'Abwesend':'Anwesend'}</div>`, act:()=>push({type:'absent'})},
            {html:`${ico(I.suitcase,34)}<div class="lbl" style="margin-top:12px">Urlaub</div>`, act:()=>push({type:'vac'})} ]},
     {col:[ {html:`${ico(I.bars,34)}<div class="lbl" style="margin-top:12px">Energie</div>`, act:()=>push({type:'energy',tab:0})},
@@ -1184,7 +1190,9 @@ function samActivity(){
   const g = k => { const r=samPick('sensor.'+EHS_PREFIX+k); return r&&S[r]?S[r].state:null; };
   const df=g('outdoordefroststep'); if(df && !/^(No defrost operation|unknown|unavailable|0)$/.test(df)) return 'defrost';
   if(g('power')==='OFF') return 'off';
-  const hz=parseFloat(g('outdoorcomp1runhz')); const comp = g('outdoorcomp1status')==='on' || (!isNaN(hz) && hz>0);
+  const nf=k=>{ const v=parseFloat(g(k)); return isNaN(v)?0:v; };
+  const kw = nf('outdoorcontrolwattmeterallunit'); const kwv = kw>50 ? kw/1000 : kw;   // W oder kW
+  const comp = g('outdoorcomp1status')==='on' || nf('outdoorcomp1runhz')>0 || kwv>0.15 || nf('ehssentinelheatoutput')>100;
   if(!comp) return 'off';
   if(g('dhwvalve')==='TANK') return 'hot water';
   if(g('indooropmode')==='Cool') return 'cooling';
@@ -1239,7 +1247,7 @@ function homeHeader(){
 const SLOT_W=334, PAGE_W=668;
 function vHome(){
   const slots = homeSlots();
-  const tileDiv = (c,cls) => `<div class="tile ${cls||''} ${c.cls||''}" data-a="${a(c.act)}">${c.html}</div>`;
+  const tileDiv = (c,cls) => `<div class="tile ${cls||''} ${c.cls||''} ${SAM_MODE?'card':''}" data-a="${a(c.act)}">${c.html}</div>`;
   if(PORTRAIT){
     const html = slots.map(s=> s.col ? `<div class="prow">${s.col.map(c=>tileDiv(c)).join('')}</div>` : tileDiv(s,'big')).join('');
     return homeHeader() + `<div class="body homep">${html}</div>`;
@@ -1286,6 +1294,7 @@ function fmtVal(it){
   const id=it.id; if(!has(id)) return 'n. v.';
   if(it.t==='sel') return selLabel(id,it.en);
   const sam = SAM_MODE && R(id).includes('ehssentinel');
+  if(sam && /errorcode/.test(R(id)) && [0,-1].includes(parseFloat(st(id)))) return 'Keine Störung';
   if(sam && (it.en || isNaN(parseFloat(st(id)))) && !it.bin) return samTr(st(id));
   if(sam && unit(id)==='W' && Math.abs(parseFloat(st(id)))>=1000) return fmtN(parseFloat(st(id))/1000,1)+' kW';
   if(it.fmt==='hour' || (sam && it.fmt==='time')){ const h=parseFloat(st(id)); return isNaN(h)?'–':String(Math.round(h)).padStart(2,'0')+':00'; }
@@ -1673,9 +1682,13 @@ function vOutdoor(t){
 /* ---------- Energie ---------- */
 /* „Heute“ = Zählerstand jetzt − Zählerstand um 0:00 (aus dem HA-Verlauf) */
 const ETODAY = {at:0, day:'', v:{}, loading:false, err:null};
+// Energie immer in kWh (EHS Sentinel liefert teils Wh)
+function kwh(id){ const v=nv(id); if(v==null) return null; const u=unit(id); return u==='Wh'?v/1000:u==='MWh'?v*1000:v; }
 async function loadEnergyToday(force){
   const keys=['nrgconscomptotal','auxelecheatnrgconstotal','nrgsupptotal'];
   const day=new Date().toDateString();
+  if(SAM_MODE){ const dc=E_('sensor','ehssentineldailyconsumedpower'), dg=E_('sensor','ehssentineldailygeneratedpower');
+    if(has(dc)||has(dg)){ Object.assign(ETODAY,{v:{nrgconscomptotal:kwh(dc)||0,auxelecheatnrgconstotal:0,nrgsupptotal:kwh(dg)||0},day,at:Date.now(),loading:false,err:null}); return; } }
   if(ETODAY.loading || (!force && ETODAY.day===day && Date.now()-ETODAY.at<300e3)) return;
   ETODAY.loading=true;
   const mid=new Date(); mid.setHours(0,0,0,0);
@@ -1697,7 +1710,7 @@ function vEnergy(t){
               ['Warmwasser','dhw_nrgconscomp','dhw_auxelecheatnrgcons','dhw_nrgsupp'],['Kühlen','nrgconscompcooling',null,'nrgsuppcooling']];
   const c=cats[t.tab]; const today=t.tab===0;
   if(today) loadEnergyToday(false);
-  const g=k=>!k?0:today?(ETODAY.v[k]||0):(nv(B(k))||0);
+  const g=k=>!k?0:today?(ETODAY.v[k]||0):(kwh(B(k))||0);
   const comp=g(c[1]), aux=g(c[2]), sup=g(c[3]); const env=Math.max(0,sup-comp-aux); const tot=comp+aux+env||1;
   const pc=x=>Math.round(x/tot*100); const R_=62, C=2*Math.PI*R_; let off=0;
   const seg=(v,col)=>{ const l=v/tot*C; const s=`<circle r="${R_}" cx="90" cy="90" fill="none" stroke="${col}" stroke-width="34" stroke-dasharray="${l} ${C-l}" stroke-dashoffset="${-off}" transform="rotate(-90 90 90)"/>`; off+=l; return s; };

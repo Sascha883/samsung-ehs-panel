@@ -7,7 +7,8 @@
         "data": {
           "sidebar_title": "Sidebar title",
           "sidebar_icon": "Icon",
-          "require_admin": "Admins only"
+          "require_admin": "Admins only",
+          "show_manager": "Show “EHS Sentinel” management page (admins)"
         }
       }
     },
@@ -22,7 +23,8 @@
         "data": {
           "sidebar_title": "Sidebar title",
           "sidebar_icon": "Icon",
-          "require_admin": "Admins only"
+          "require_admin": "Admins only",
+          "show_manager": "Show “EHS Sentinel” management page (admins)"
         }
       }
     }

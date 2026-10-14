@@ -21,11 +21,15 @@ from .logbuffer import EhsLogBuffer
 from .const import (
     CONF_ADMIN,
     CONF_ICON,
+    CONF_MANAGER,
     CONF_TITLE,
     DEFAULT_ADMIN,
     DEFAULT_ICON,
+    DEFAULT_MANAGER,
     DEFAULT_TITLE,
     DOMAIN,
+    MANAGER_FILE,
+    MANAGER_URL_PATH,
     PANEL_FILE,
     PANEL_URL_PATH,
     STATIC_URL,
@@ -85,6 +89,20 @@ async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
         require_admin=opts.get(CONF_ADMIN, DEFAULT_ADMIN),
         update=True,
     )
+    # Zweiter Eintrag: Verwaltung der EHS-Sentinel-Schnittstelle (nur Admins)
+    if opts.get(CONF_MANAGER, DEFAULT_MANAGER):
+        frontend.async_register_built_in_panel(
+            hass,
+            component_name="iframe",
+            sidebar_title="EHS Sentinel",
+            sidebar_icon="mdi:lan-connect",
+            frontend_url_path=MANAGER_URL_PATH,
+            config={"url": f"{STATIC_URL}/{MANAGER_FILE}?v={VERSION}"},
+            require_admin=True,
+            update=True,
+        )
+    else:
+        frontend.async_remove_panel(hass, MANAGER_URL_PATH)
     entry.async_on_unload(entry.add_update_listener(_async_reload))
     _LOGGER.debug("Samsung EHS Panel %s unter /%s registriert", VERSION, PANEL_URL_PATH)
     return True
@@ -127,6 +145,7 @@ class PanelFileView(HomeAssistantView):
 async def async_unload_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
     """Seitenleisten-Eintrag entfernen."""
     frontend.async_remove_panel(hass, PANEL_URL_PATH)
+    frontend.async_remove_panel(hass, MANAGER_URL_PATH)
     buf = hass.data.get(DOMAIN, {}).get("logbuffer")
     if buf:
         buf.detach()

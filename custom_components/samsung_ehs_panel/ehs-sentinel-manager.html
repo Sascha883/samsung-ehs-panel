@@ -1,0 +1,355 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+<title>EHS Sentinel – Verwaltung</title>
+<style>
+/* Farben werden beim Start aus dem Home-Assistant-Theme übernommen (Fallback: dunkel) */
+:root{
+  --bg:#111418; --card:#1c1f24; --card2:#24282e; --txt:#e3e5e8; --dim:#9aa0a6; --line:#33383f;
+  --acc:#03a9f4; --ok:#43a047; --warn:#ffa600; --err:#db4437; --r:12px;
+  color-scheme:dark;
+}
+@media (prefers-color-scheme: light){
+  :root:not([data-theme="dark"]){ --bg:#fafafa; --card:#fff; --card2:#f2f4f7; --txt:#212121; --dim:#6b7280; --line:#e0e0e0; color-scheme:light; }
+}
+:root[data-theme="light"]{ --bg:#fafafa; --card:#fff; --card2:#f2f4f7; --txt:#212121; --dim:#6b7280; --line:#e0e0e0; color-scheme:light; }
+:root{box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
+*,*::before,*::after{box-sizing:inherit}
+html{scroll-padding-top:env(safe-area-inset-top,0px)}
+body{margin:0;background:var(--bg);color:var(--txt);font:15px/1.45 Roboto,"Segoe UI",system-ui,-apple-system,sans-serif}
+.wrap{padding:20px 24px 40px;max-width:1700px;margin:0 auto}
+.grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:24px;align-items:start}
+@media (max-width:1150px){.grid{grid-template-columns:repeat(2,minmax(0,1fr))}}
+@media (max-width:760px){.grid{grid-template-columns:1fr}.wrap{padding:14px 12px 30px}}
+.col{display:flex;flex-direction:column;gap:12px;min-width:0}
+h2{font-size:16px;font-weight:500;margin:4px 0 2px;display:flex;align-items:center;gap:8px}
+h2 svg{width:18px;height:18px;flex:none}
+.card{background:var(--card);border:1px solid var(--line);border-radius:var(--r);overflow:hidden}
+.card.pad{padding:14px 16px}
+.hero b{display:block;font-size:16px;margin-bottom:4px}
+.hero a{color:var(--acc)}
+.act{display:flex;align-items:center;gap:14px;padding:12px 16px;cursor:pointer;background:var(--card);border:1px solid var(--line);border-radius:var(--r);color:var(--txt);font:inherit;text-align:left;width:100%}
+.act:hover{background:var(--card2)}
+.act:disabled{opacity:.5;cursor:default}
+.act .ic{width:34px;height:34px;border-radius:50%;display:grid;place-items:center;background:color-mix(in srgb,var(--acc) 18%,transparent);color:var(--acc);flex:none}
+.act .ic.warn{background:color-mix(in srgb,var(--warn) 18%,transparent);color:var(--warn)}
+.act .ic svg{width:20px;height:20px}
+.act small{display:block;color:var(--dim);font-size:13px}
+.rows .r{display:flex;justify-content:space-between;align-items:center;gap:14px;padding:11px 16px;border-top:1px solid var(--line)}
+.rows .r:first-child{border-top:0}
+.rows .r .k{display:flex;align-items:center;gap:12px;color:var(--txt);min-width:0}
+.rows .r .k svg{width:20px;height:20px;color:var(--dim);flex:none}
+.rows .r .v{color:var(--txt);text-align:right;font-variant-numeric:tabular-nums;white-space:nowrap}
+.pill{display:inline-block;font-size:12.5px;padding:2px 10px;border-radius:12px;font-weight:500}
+.pill.ok{background:color-mix(in srgb,var(--ok) 20%,transparent);color:var(--ok)}
+.pill.no{background:color-mix(in srgb,var(--err) 20%,transparent);color:var(--err)}
+.pill.dm{background:color-mix(in srgb,var(--warn) 20%,transparent);color:var(--warn)}
+form .f{padding:10px 16px;border-top:1px solid var(--line)}
+form .f:first-child{border-top:0}
+form label.t{display:block;font-size:12.5px;color:var(--dim);margin-bottom:4px}
+input[type=text],input[type=number],select,textarea{width:100%;font:inherit;color:var(--txt);background:var(--card2);border:1px solid var(--line);border-radius:8px;padding:9px 11px}
+textarea{min-height:200px;font-family:ui-monospace,Menlo,Consolas,monospace;font-size:12.5px;line-height:1.4}
+input:focus-visible,select:focus-visible,textarea:focus-visible,button:focus-visible,summary:focus-visible{outline:2px solid var(--acc);outline-offset:1px}
+.sw{display:flex;justify-content:space-between;align-items:center;gap:12px;cursor:pointer}
+.sw small{display:block;color:var(--dim);font-size:12.5px}
+.sw input{appearance:none;width:40px;height:22px;border-radius:11px;background:var(--line);position:relative;flex:none;cursor:pointer;transition:background .15s}
+.sw input::after{content:"";position:absolute;top:3px;left:3px;width:16px;height:16px;border-radius:50%;background:#fff;transition:left .15s}
+.sw input:checked{background:var(--acc)}.sw input:checked::after{left:21px}
+details summary{cursor:pointer;color:var(--dim);font-size:13.5px}
+.btns{display:flex;gap:10px;flex-wrap:wrap;padding:12px 16px;border-top:1px solid var(--line)}
+.btn{font:inherit;font-size:14px;border-radius:18px;padding:7px 16px;cursor:pointer;border:1px solid var(--acc);background:transparent;color:var(--acc)}
+.btn.pri{background:var(--acc);color:#fff}
+.btn:disabled{opacity:.5;cursor:default}
+.msg{margin:0 16px 12px;padding:8px 12px;border-radius:8px;font-size:13.5px}
+.msg.ok{background:color-mix(in srgb,var(--ok) 15%,transparent);color:var(--ok)}
+.msg.err{background:color-mix(in srgb,var(--err) 15%,transparent);color:var(--err)}
+.msg.info{background:var(--card2);color:var(--dim)}
+.log{margin-top:24px}
+.lhead{display:flex;flex-wrap:wrap;gap:8px;align-items:center;padding:12px 16px;border-bottom:1px solid var(--line)}
+.chip{font:inherit;font-size:13px;padding:4px 12px;border-radius:14px;border:1px solid var(--line);background:transparent;color:var(--txt);cursor:pointer}
+.chip.on{background:var(--acc);border-color:var(--acc);color:#fff}
+.sp{flex:1}
+.lbody{max-height:460px;overflow:auto}
+.lr{display:flex;gap:12px;padding:5px 16px;border-bottom:1px solid var(--line);font-size:13.5px;line-height:1.35}
+.lr .t{color:var(--dim);flex:none;font-variant-numeric:tabular-nums}
+.lr .l{flex:none;width:14px;font-weight:700;text-align:center}
+.lr .m{min-width:0;white-space:pre-wrap;word-break:break-word}
+.lr .n{display:block;color:var(--dim);font-size:11.5px}
+.lr.WARNING .l{color:var(--warn)}.lr.ERROR .l,.lr.CRITICAL .l,.lr.ERROR .m{color:var(--err)}.lr.DEBUG .m{color:var(--dim)}
+.pk{font-family:ui-monospace,Menlo,Consolas,monospace;font-size:12px;padding:3px 16px;border-bottom:1px solid var(--line);word-break:break-all}
+.empty{padding:16px;color:var(--dim)}
+.toast{position:fixed;left:50%;bottom:calc(20px + env(safe-area-inset-bottom,0px));transform:translateX(-50%);background:var(--txt);color:var(--bg);padding:8px 16px;border-radius:20px;font-size:14px;opacity:0;transition:opacity .2s;pointer-events:none;z-index:9}
+.toast.on{opacity:1}
+.dlg{position:fixed;inset:0;background:rgba(0,0,0,.55);display:none;align-items:center;justify-content:center;z-index:8;padding:16px}
+.dlg.on{display:flex}
+.dlg .box{background:var(--card);border:1px solid var(--line);border-radius:var(--r);max-width:440px;width:100%;padding:18px}
+.dlg h3{margin:0 0 8px;font-size:17px;font-weight:500}
+.dlg p{margin:0 0 16px;color:var(--dim)}
+.dlg .bb{display:flex;justify-content:flex-end;gap:10px}
+.fatal{max-width:560px;margin:60px auto;padding:20px;text-align:center;color:var(--dim)}
+@media (prefers-reduced-motion:reduce){.sw input,.sw input::after,.toast{transition:none}}
+</style>
+</head>
+<body>
+<div class="wrap" id="app"><div class="fatal">Verbinde mit Home Assistant …</div></div>
+<div class="toast" id="toast" role="status" aria-live="polite"></div>
+<div class="dlg" id="dlg" role="dialog" aria-modal="true" aria-labelledby="dlgT"><div class="box"><h3 id="dlgT"></h3><p id="dlgP"></p>
+  <div class="bb"><button class="btn" id="dlgN">Abbrechen</button><button class="btn pri" id="dlgY">OK</button></div></div></div>
+<script>
+/* EHS Sentinel – Verwaltung · Teil der Integration „Samsung EHS Panel“ */
+const WS = 'samsung_ehs_panel/';
+const $ = s => document.querySelector(s);
+const esc = s => String(s ?? '').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const fmtN = (v,d=0) => v==null||isNaN(v) ? '–' : Number(v).toLocaleString('de-DE',{minimumFractionDigits:d,maximumFractionDigits:d});
+const IC = {
+  chip:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7"><rect x="6" y="6" width="12" height="12" rx="2"/><path d="M9 2v4M15 2v4M9 18v4M15 18v4M2 9h4M2 15h4M18 9h4M18 15h4"/></svg>',
+  plug:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7"><path d="M9 2v6M15 2v6M6 8h12v4a6 6 0 0 1-12 0zM12 18v4"/></svg>',
+  info:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7"><circle cx="12" cy="12" r="9"/><path d="M12 11v6M12 7.5v.5"/></svg>',
+  tag:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7"><path d="M3 12V4h8l10 10-8 8z"/><circle cx="7.5" cy="8.5" r="1.3"/></svg>',
+  dl:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M12 4v11M7 10l5 5 5-5M5 20h14"/></svg>',
+  ref:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M20 12a8 8 0 1 1-2.3-5.6M20 4v5h-5"/></svg>',
+  pulse:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M3 12h4l2-6 4 12 2-6h6"/></svg>',
+  list:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M8 6h13M8 12h13M8 18h13M3 6h.01M3 12h.01M3 18h.01"/></svg>',
+  panel:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7"><rect x="3" y="4" width="18" height="16" rx="2"/><path d="M3 9h18"/></svg>',
+  link:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7"><path d="M10 14a4 4 0 0 0 6 0l3-3a4 4 0 0 0-6-6l-1 1M14 10a4 4 0 0 0-6 0l-3 3a4 4 0 0 0 6 6l1-1"/></svg>',
+};
+
+/* ---------- Home Assistant ---------- */
+let hass = null;
+function getHass(){ try{ const el = window.parent.document.querySelector('home-assistant'); return el && el.hass && el.hass.connection ? el.hass : null; }catch(e){ return null; } }
+function applyTheme(){
+  try{
+    const el = window.parent.document.querySelector('home-assistant'); if(!el) return;
+    const cs = getComputedStyle(el), root = document.documentElement.style, g = n => cs.getPropertyValue(n).trim();
+    const map = {'--bg':'--primary-background-color','--card':'--card-background-color','--txt':'--primary-text-color','--dim':'--secondary-text-color',
+                 '--acc':'--primary-color','--line':'--divider-color','--ok':'--success-color','--warn':'--warning-color','--err':'--error-color','--card2':'--secondary-background-color'};
+    for(const [k,v] of Object.entries(map)){ const x = g(v); if(x) root.setProperty(k, x); }
+    const dark = window.parent.matchMedia && el.hass && el.hass.themes ? !!el.hass.themes.darkMode : null;
+    if(dark!=null) document.documentElement.setAttribute('data-theme', dark?'dark':'light');
+  }catch(e){}
+}
+const send = m => hass.connection.sendMessagePromise(m);
+const callService = (d,s,data) => hass.callService(d,s,data);
+function errText(e){ const c=e&&e.code, m=(e&&e.message)||String(e||'Fehler');
+  if(c==='unknown_command') return 'Die Integration „Samsung EHS Panel“ ist veraltet – bitte auf Version 1.2 aktualisieren und HA neu starten.';
+  if(c==='unauthorized') return 'Nur für Administratoren.'; return m; }
+
+/* ---------- Zustand ---------- */
+const st = { status:null, err:null, sel:null, cfg:null, cfgFor:null, form:null, cfgMsg:null, busy:false,
+             log:{tab:'log', level:'all', data:null, err:null, pause:false, file:null} };
+
+async function loadStatus(){
+  try{ st.status = await send({type:WS+'status'}); st.err=null;
+       const ids = st.status.instances.map(x=>x.entry_id); if(!ids.includes(st.sel)) st.sel = ids[0]||null;
+       if(st.sel && st.cfgFor!==st.sel) await loadCfg(); }
+  catch(e){ st.err = errText(e); }
+}
+async function loadCfg(){
+  try{ st.cfg = await send({type:WS+'config_get', entry_id:st.sel}); st.cfgFor = st.sel; st.form = {...st.cfg}; st.cfgMsg=null; }
+  catch(e){ st.cfgMsg = {cls:'err', t:errText(e)}; }
+}
+async function loadLog(){
+  const L = st.log; if(L.pause) return;
+  try{
+    L.data = L.tab==='log' ? await send({type:WS+'logs', level:L.level, limit:600})
+                           : await send({type:WS+'packet_log', lines:300, ...(L.file?{file:L.file}:{})});
+    L.err = null;
+  }catch(e){ L.err = errText(e); }
+}
+
+/* ---------- Updates (HACS-Update-Entitäten) ---------- */
+function updates(){
+  const out = {ehs:null, panel:null};
+  for(const [id,s] of Object.entries(hass.states)){
+    if(!id.startsWith('update.')) continue;
+    const t = `${s.attributes.title||''} ${s.attributes.friendly_name||''} ${id}`.toLowerCase();
+    if(/samsung.?ehs.?panel|ehs.?sentinel.?panel/.test(t)) out.panel = {id, s};
+    else if(/ehs.?sentinel/.test(t)) out.ehs = {id, s};
+  }
+  return out;
+}
+
+/* ---------- Oberfläche ---------- */
+const A = []; const act = fn => (A.push(fn), A.length-1);
+function row(icon,k,v){ return `<div class="r"><span class="k">${IC[icon]||''}${esc(k)}</span><span class="v">${v}</span></div>`; }
+function actBtn(icon,title,sub,fn,cls=''){ return `<button class="act" data-a="${act(fn)}"><span class="ic ${cls}">${IC[icon]}</span><span>${esc(title)}${sub?`<small>${esc(sub)}</small>`:''}</span></button>`; }
+
+function updCard(label, u, installed){
+  if(!u) return `<div class="card pad hero"><b>${esc(label)}</b>Installiert: <b style="display:inline">${esc(installed||'–')}</b><br><span style="color:var(--dim);font-size:13px">Keine HACS-Update-Entität gefunden.</span></div>`;
+  const a = u.s.attributes, avail = u.s.state==='on';
+  return `<div class="card pad hero"><b>${avail?'Neue Version verfügbar':'Aktuell'}</b>
+    Installiert: <b style="display:inline">${esc(a.installed_version||installed||'–')}</b>${avail?` → Neu: <b style="display:inline">${esc(a.latest_version)}</b>`:''}
+    ${a.release_url?`<br><a href="${esc(a.release_url)}" target="_blank" rel="noopener">Änderungen ansehen</a>`:''}</div>
+    ${avail?actBtn('dl', a.in_progress?'Wird installiert …':`Update auf ${a.latest_version} installieren`, 'Neustart von Home Assistant danach nötig', ()=>confirmDo(`${label} aktualisieren`,`Version ${a.latest_version} über HACS installieren?`,
+      ()=>callService('update','install',{entity_id:u.id}).then(()=>toast('Installation gestartet')).catch(e=>toast(errText(e))))):''}
+    ${actBtn('ref','Updates prüfen','',()=>callService('homeassistant','update_entity',{entity_id:u.id}).then(()=>toast('Wird geprüft …')).catch(e=>toast(errText(e))))}`;
+}
+
+function render(){
+  A.length = 0;
+  if(!hass){ $('#app').innerHTML = `<div class="fatal">Diese Seite funktioniert nur innerhalb von Home Assistant (Seitenleiste „EHS Sentinel“).</div>`; return; }
+  if(st.err && !st.status){ $('#app').innerHTML = `<div class="fatal">${esc(st.err)}</div>`; return; }
+  if(!st.status){ $('#app').innerHTML = `<div class="fatal">Lade …</div>`; return; }
+  const S = st.status, inst = S.instances.find(x=>x.entry_id===st.sel), U = updates();
+  const yn = v => v==null ? '–' : v ? 'Ein' : 'Aus';
+  const stateTxt = ({loaded:'Geladen',setup_error:'Einrichtungsfehler',setup_retry:'Einrichtung wird wiederholt',not_loaded:'Nicht geladen',failed_unload:'Entladen fehlgeschlagen',setup_in_progress:'Wird eingerichtet'});
+
+  // Spalte 1: Versionen
+  const c1 = `<div class="col">
+    <h2>${IC.tag}EHS Sentinel</h2>${updCard('EHS Sentinel', U.ehs, S.ehs_version)}
+    <h2>${IC.panel}Samsung-Panel</h2>
+    <div class="card rows">${row('tag','Panel-Version',esc(S.version))}${row('info','Integration','Samsung EHS Panel')}</div>
+    ${U.panel ? updCard('Samsung EHS Panel', U.panel, S.version) : ''}
+    ${actBtn('panel','Panel öffnen','Samsung-Bedieneinheit',()=>openHA('/samsung-ehs'))}
+  </div>`;
+
+  // Spalte 2: Schnittstelle
+  let c2 = `<div class="col"><h2>${IC.plug}Schnittstelle (RS485-Adapter)</h2>`;
+  if(!S.instances.length) c2 += `<div class="card pad">Keine EHS-Sentinel-Integration eingerichtet.</div>`;
+  else {
+    const f = st.form || {};
+    const sw = (k,l,h) => `<div class="f"><label class="sw"><span>${esc(l)}${h?`<small>${esc(h)}</small>`:''}</span><input type="checkbox" data-k="${k}" ${f[k]?'checked':''}></label></div>`;
+    c2 += `<div class="card"><form id="cfg" onsubmit="return false">
+      ${S.instances.length>1?`<div class="f"><label class="t" for="inst">Instanz</label><select id="inst">${S.instances.map(x=>`<option value="${esc(x.entry_id)}" ${x.entry_id===st.sel?'selected':''}>${esc(x.title)}</option>`).join('')}</select></div>`:''}
+      <div class="f"><label class="t" for="ip">IP-Adresse des RS485-Adapters</label><input type="text" id="ip" data-k="ip" value="${esc(f.ip||'')}" inputmode="decimal" autocomplete="off"></div>
+      <div class="f"><label class="t" for="port">Port</label><input type="number" id="port" data-k="port" value="${esc(f.port??'')}" min="1" max="65535"></div>
+      ${sw('write_mode','Schreibmodus','Einstellungen aus HA an die WP senden')}
+      ${sw('polling','Polling','Werte zyklisch aktiv abfragen')}
+      ${sw('extended_logging','Erweitertes Logging','Schreibt das Paket-Log (www/ehs_sentinel/logs)')}
+      ${sw('force_refresh','Force Refresh','Alle Werte beim Start neu anfordern')}
+      ${sw('diagnostic_logs','Diagnose-Protokolle','Zusätzliche Diagnosemeldungen')}
+      <div class="f"><details><summary>Polling-Konfiguration (YAML)</summary><div style="margin-top:8px"><textarea data-k="polling_yaml" spellcheck="false">${esc(f.polling_yaml||'')}</textarea></div></details></div>
+    </form>
+    ${st.cfgMsg?`<div class="msg ${st.cfgMsg.cls}">${esc(st.cfgMsg.t)}</div>`:''}
+    <div class="btns"><button class="btn" data-a="${act(testConn)}" ${st.busy?'disabled':''}>Verbindung testen</button>
+      <button class="btn pri" data-a="${act(saveCfg)}" ${st.busy?'disabled':''}>Speichern &amp; neu verbinden</button></div></div>
+    <div class="card pad" style="color:var(--dim);font-size:13px">Speichern nutzt den Einstellungsdialog von EHS Sentinel: Adresse und YAML werden geprüft, die Verbindung getestet und die Integration neu geladen.</div>`;
+  }
+  c2 += `</div>`;
+
+  // Spalte 3: System
+  let c3 = `<div class="col"><h2>${IC.info}System</h2>`;
+  if(inst){
+    const s = inst.stats||{};
+    const pill = !inst.loaded ? '<span class="pill dm">Nicht geladen</span>' : inst.connected ? '<span class="pill ok">Verbunden</span>' : '<span class="pill no">Getrennt</span>';
+    c3 += `<div class="card rows">
+      ${row('plug','RS485-Verbindung',pill)}
+      ${row('link','Adresse',esc((inst.ip||'–')+':'+(inst.port||'–')))}
+      ${row('info','Integrationsstatus',esc(stateTxt[inst.state]||inst.state))}
+      ${row('tag','EHS Sentinel',esc(S.ehs_version||'–'))}
+      ${row('chip','Schreibmodus',yn(inst.write_mode))}
+      ${row('ref','Polling',yn(inst.polling))}
+      ${row('pulse','Pakete gelesen',fmtN(s.packets_read))}
+      ${row('pulse','Pakete verarbeitet',fmtN(s.packets_processed))}
+      ${row('pulse','Pakete angefordert',fmtN(s.packets_requested))}
+      ${row('pulse','Fremde Pakete',fmtN(s.packets_processed_not_indoor_outdoor))}
+      ${row('list','Warteschlange',fmtN(inst.queue))}
+      <div class="r"><span class="k">${IC.list}Protokollstufe</span><span class="v"><select id="lvl" style="width:auto;padding:5px 8px">
+        ${[['default','Standard (HA)'],['info','Info'],['debug','Debug']].map(([v,l])=>`<option value="${v}" ${S.log_level===v?'selected':''}>${l}</option>`).join('')}</select></span></div>
+    </div>
+    ${actBtn('pulse','Diagnose anfordern','Tasks, Warteschlange, Zähler → Protokoll',()=>send({type:WS+'diagnostics'}).then(()=>{ toast('Diagnose angefordert'); st.log.tab='log'; refreshLog(); }).catch(e=>toast(errText(e))))}
+    ${actBtn('ref','Verbindung neu aufbauen','Lädt EHS Sentinel neu',()=>confirmDo('Verbindung neu aufbauen',`„${inst.title}“ wird neu geladen. Werte sind kurz nicht verfügbar.`,
+        ()=>send({type:WS+'reconnect',entry_id:inst.entry_id}).then(()=>{ toast('Neu verbunden'); refreshAll(); }).catch(e=>toast(errText(e)))),'warn')}`;
+  } else c3 += `<div class="card pad">–</div>`;
+  c3 += `</div>`;
+
+  // Protokoll
+  const L = st.log;
+  let lb;
+  if(L.err) lb = `<div class="empty">${esc(L.err)}</div>`;
+  else if(!L.data) lb = `<div class="empty">Lade …</div>`;
+  else if(L.tab==='log'){
+    const ents = (L.data.entries||[]).slice().reverse();
+    lb = ents.length ? ents.map(e=>`<div class="lr ${esc(e.level)}"><span class="t">${new Date(e.ts*1000).toLocaleTimeString('de-DE')}</span><span class="l">${esc(e.level[0])}</span><span class="m">${esc(e.msg)}<span class="n">${esc(e.name)}</span></span></div>`).join('') : `<div class="empty">Keine Meldungen in dieser Stufe.</div>`;
+  } else {
+    const files = L.data.files||[];
+    lb = !files.length ? `<div class="empty">Kein Paket-Log vorhanden – oben „Erweitertes Logging“ einschalten und speichern.</div>`
+       : (L.data.lines||[]).slice().reverse().map(l=>`<div class="pk">${esc(l)}</div>`).join('') || `<div class="empty">Datei ist leer.</div>`;
+  }
+  const chip = (on,l,fn) => `<button class="chip ${on?'on':''}" data-a="${act(fn)}">${l}</button>`;
+  const files = (L.tab==='pkt' && L.data && L.data.files) || [];
+  const log = `<div class="log"><h2>${IC.list}Protokoll</h2><div class="card">
+    <div class="lhead">
+      ${chip(L.tab==='log','Protokoll',()=>{ L.tab='log'; L.data=null; refreshLog(); })}${chip(L.tab==='pkt','Paket-Log',()=>{ L.tab='pkt'; L.data=null; refreshLog(); })}
+      <span style="width:12px"></span>
+      ${L.tab==='log' ? [['all','Alle'],['info','Info+'],['warning','Warnungen'],['error','Fehler']].map(([k,l])=>chip(L.level===k,l,()=>{ L.level=k; L.data=null; refreshLog(); })).join('')
+                       : files.length>1 ? files.map(f=>chip((L.data.file)===f, esc(f.replace(/^packet_|\.log$/g,'')), ()=>{ L.file=f; L.data=null; refreshLog(); })).join('') : ''}
+      <span class="sp"></span>
+      ${chip(L.pause, L.pause?'▶ Weiter':'❚❚ Pause', ()=>{ L.pause=!L.pause; render(); })}
+      ${chip(false,'Kopieren',()=>copyLog())}
+      ${L.tab==='log'?chip(false,'Leeren',()=>confirmDo('Protokoll leeren','Alle aufgezeichneten Meldungen löschen?',()=>send({type:WS+'clear_logs'}).then(refreshLog))):''}
+    </div><div class="lbody" id="lbody">${lb}</div></div></div>`;
+
+  const lbOld = $('#lbody'), scroll = lbOld ? lbOld.scrollTop : 0;
+  const focus = document.activeElement && document.activeElement.dataset ? document.activeElement.dataset.k : null;
+  $('#app').innerHTML = `<div class="grid">${c1}${c2}${c3}</div>${log}`;
+  const lbNew = $('#lbody'); if(lbNew) lbNew.scrollTop = scroll;
+  if(focus){ const el = document.querySelector(`[data-k="${focus}"]`); if(el) el.focus(); }
+  bind();
+}
+function bind(){
+  document.querySelectorAll('[data-a]').forEach(el=>el.addEventListener('click',ev=>{ ev.preventDefault(); const f=A[+el.dataset.a]; if(f) f(); }));
+  document.querySelectorAll('#cfg [data-k]').forEach(el=>{
+    const upd = () => { st.form[el.dataset.k] = el.type==='checkbox' ? el.checked : el.type==='number' ? (el.value===''?'':+el.value) : el.value; };
+    el.addEventListener('input', upd); el.addEventListener('change', upd);
+  });
+  const inst = $('#inst'); if(inst) inst.addEventListener('change', async()=>{ st.sel = inst.value; await loadCfg(); render(); });
+  const lvl = $('#lvl'); if(lvl) lvl.addEventListener('change', ()=>send({type:WS+'log_level',level:lvl.value}).then(r=>{ toast('Protokollstufe: '+lvl.options[lvl.selectedIndex].text); refreshAll(); }).catch(e=>toast(errText(e))));
+}
+
+/* ---------- Aktionen ---------- */
+function openHA(path){ try{ window.parent.history.pushState(null,'',path); window.parent.dispatchEvent(new CustomEvent('location-changed')); }catch(e){ window.open(path,'_top'); } }
+async function testConn(){
+  const f = st.form; if(!f.ip || !f.port){ st.cfgMsg={cls:'err',t:'IP und Port eintragen.'}; render(); return; }
+  st.busy=true; st.cfgMsg={cls:'info',t:`Teste ${f.ip}:${f.port} …`}; render();
+  try{ const r = await send({type:WS+'test_connection', ip:String(f.ip).trim(), port:+f.port});
+       st.cfgMsg = r.ok ? {cls:'ok',t:`Verbindung OK (${r.ms} ms) – ${f.ip}:${f.port} ist erreichbar.`} : {cls:'err',t:`Keine Verbindung zu ${f.ip}:${f.port}: ${r.error}`}; }
+  catch(e){ st.cfgMsg={cls:'err',t:errText(e)}; }
+  st.busy=false; render();
+}
+function saveCfg(){
+  const f = st.form;
+  confirmDo('Schnittstelle speichern', `Einstellungen für „${f.name||'EHS Sentinel'}“ speichern? Die Verbindung wird getestet und EHS Sentinel neu geladen.`, async()=>{
+    st.busy=true; st.cfgMsg={cls:'info',t:'Speichere und verbinde neu …'}; render();
+    const values = {}; for(const k of ['ip','port','write_mode','polling','polling_yaml','extended_logging','force_refresh','diagnostic_logs']) values[k]=f[k];
+    values.ip = String(values.ip||'').trim();
+    try{ const r = await send({type:WS+'config_set', entry_id:st.sel, values});
+         st.cfgMsg = r.ok ? {cls:'ok',t:'Gespeichert – EHS Sentinel wurde neu geladen.'} : {cls:'err',t:r.error};
+         if(r.ok){ st.cfgFor=null; await loadStatus(); } }
+    catch(e){ st.cfgMsg={cls:'err',t:errText(e)}; }
+    st.busy=false; render();
+  });
+}
+function copyLog(){
+  const L=st.log; if(!L.data) return;
+  const text = L.tab==='log' ? (L.data.entries||[]).map(e=>`${new Date(e.ts*1000).toLocaleString('de-DE')} ${e.level} ${e.name}: ${e.msg}`).join('\n') : (L.data.lines||[]).join('\n');
+  const done = () => toast('In die Zwischenablage kopiert');
+  const fb = () => { const ta=document.createElement('textarea'); ta.value=text; ta.style.position='fixed'; ta.style.opacity='0'; document.body.appendChild(ta); ta.select(); try{ document.execCommand('copy'); done(); }catch(e){ toast('Kopieren nicht möglich'); } ta.remove(); };
+  if(navigator.clipboard && window.isSecureContext) navigator.clipboard.writeText(text).then(done).catch(fb); else fb();
+}
+function toast(t){ const el=$('#toast'); el.textContent=t; el.classList.add('on'); clearTimeout(toast._t); toast._t=setTimeout(()=>el.classList.remove('on'),2600); }
+function confirmDo(title,text,yes){
+  const d=$('#dlg'); $('#dlgT').textContent=title; $('#dlgP').textContent=text; d.classList.add('on'); $('#dlgY').focus();
+  const close=()=>{ d.classList.remove('on'); $('#dlgY').onclick=$('#dlgN').onclick=null; };
+  $('#dlgN').onclick=close; $('#dlgY').onclick=()=>{ close(); yes(); };
+}
+document.addEventListener('keydown',e=>{ if(e.key==='Escape') $('#dlg').classList.remove('on'); });
+
+/* ---------- Ablauf ---------- */
+async function refreshLog(){ await loadLog(); render(); }
+async function refreshAll(){ await loadStatus(); await loadLog(); render(); }
+function editing(){ const a=document.activeElement; return a && a.closest && a.closest('#cfg') && a.tagName!=='BUTTON'; }
+async function start(){
+  for(let i=0;i<40 && !(hass=getHass()); i++) await new Promise(r=>setTimeout(r,150));
+  applyTheme();
+  if(!hass){ render(); return; }
+  await refreshAll();
+  setInterval(async()=>{ if(document.hidden) return; hass = getHass()||hass; await loadStatus(); await loadLog(); if(!editing()) render(); }, 4000);
+}
+start();
+</script>
+</body>
+</html>
