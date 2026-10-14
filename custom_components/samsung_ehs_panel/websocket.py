@@ -11,7 +11,7 @@ import voluptuous as vol
 from homeassistant.components import websocket_api
 from homeassistant.core import HomeAssistant
 
-from .const import DOMAIN, VERSION
+from .const import DOMAIN, VERSION, WS_PREFIX
 
 EHS_DOMAIN = "ehs_sentinel"
 LEVELS = {"all": 0, "info": logging.INFO, "warning": logging.WARNING, "error": logging.ERROR}
@@ -58,7 +58,7 @@ def _instances(hass: HomeAssistant) -> list[dict[str, Any]]:
     return out
 
 
-@websocket_api.websocket_command({vol.Required("type"): f"{DOMAIN}/status"})
+@websocket_api.websocket_command({vol.Required("type"): f"{WS_PREFIX}/status"})
 @websocket_api.require_admin
 @websocket_api.async_response
 async def ws_status(hass: HomeAssistant, connection, msg) -> None:
@@ -71,7 +71,7 @@ async def ws_status(hass: HomeAssistant, connection, msg) -> None:
 
 @websocket_api.websocket_command(
     {
-        vol.Required("type"): f"{DOMAIN}/logs",
+        vol.Required("type"): f"{WS_PREFIX}/logs",
         vol.Optional("since", default=0): int,
         vol.Optional("level", default="all"): vol.In(list(LEVELS)),
         vol.Optional("limit", default=500): vol.All(int, vol.Range(min=1, max=2000)),
@@ -88,7 +88,7 @@ async def ws_logs(hass: HomeAssistant, connection, msg) -> None:
 
 
 @websocket_api.websocket_command(
-    {vol.Required("type"): f"{DOMAIN}/log_level", vol.Required("level"): vol.In(["default", "info", "debug"])}
+    {vol.Required("type"): f"{WS_PREFIX}/log_level", vol.Required("level"): vol.In(["default", "info", "debug"])}
 )
 @websocket_api.require_admin
 @websocket_api.async_response
@@ -97,7 +97,7 @@ async def ws_log_level(hass: HomeAssistant, connection, msg) -> None:
     connection.send_result(msg["id"], {"level": buf.set_level(msg["level"]) if buf else "default"})
 
 
-@websocket_api.websocket_command({vol.Required("type"): f"{DOMAIN}/clear_logs"})
+@websocket_api.websocket_command({vol.Required("type"): f"{WS_PREFIX}/clear_logs"})
 @websocket_api.require_admin
 @websocket_api.async_response
 async def ws_clear(hass: HomeAssistant, connection, msg) -> None:
@@ -108,7 +108,7 @@ async def ws_clear(hass: HomeAssistant, connection, msg) -> None:
     connection.send_result(msg["id"], {})
 
 
-@websocket_api.websocket_command({vol.Required("type"): f"{DOMAIN}/diagnostics"})
+@websocket_api.websocket_command({vol.Required("type"): f"{WS_PREFIX}/diagnostics"})
 @websocket_api.require_admin
 @websocket_api.async_response
 async def ws_diagnostics(hass: HomeAssistant, connection, msg) -> None:
@@ -120,7 +120,7 @@ async def ws_diagnostics(hass: HomeAssistant, connection, msg) -> None:
         connection.send_error(msg["id"], "not_found", "Dienst ehs_sentinel.request_diagnostic_logs nicht vorhanden")
 
 
-@websocket_api.websocket_command({vol.Required("type"): f"{DOMAIN}/reconnect", vol.Required("entry_id"): str})
+@websocket_api.websocket_command({vol.Required("type"): f"{WS_PREFIX}/reconnect", vol.Required("entry_id"): str})
 @websocket_api.require_admin
 @websocket_api.async_response
 async def ws_reconnect(hass: HomeAssistant, connection, msg) -> None:
@@ -147,7 +147,7 @@ def _read_packets(path: Path, lines: int) -> list[str]:
 
 @websocket_api.websocket_command(
     {
-        vol.Required("type"): f"{DOMAIN}/packet_log",
+        vol.Required("type"): f"{WS_PREFIX}/packet_log",
         vol.Optional("file"): str,
         vol.Optional("lines", default=200): vol.All(int, vol.Range(min=10, max=2000)),
     }

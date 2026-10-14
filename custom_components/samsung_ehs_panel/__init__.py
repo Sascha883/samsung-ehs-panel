@@ -5,7 +5,13 @@ import logging
 from pathlib import Path
 
 from homeassistant.components import frontend, persistent_notification
-from homeassistant.components.http import StaticPathConfig
+from aiohttp import web
+from homeassistant.components.http import HomeAssistantView
+
+try:
+    from homeassistant.helpers.http import KEY_HASS
+except ImportError:  # ältere HA-Versionen
+    from homeassistant.components.http import KEY_HASS
 from homeassistant.config_entries import ConfigEntry
 from homeassistant.core import HomeAssistant
 
@@ -27,7 +33,15 @@ from .const import (
 )
 
 _LOGGER = logging.getLogger(__name__)
-WWW_DIR = Path(__file__).parent / "www"
+BASE_DIR = Path(__file__).parent
+
+
+def _panel_file() -> Path:
+    """Panel-Datei direkt im Integrationsordner oder im Unterordner www/."""
+    for p in (BASE_DIR / PANEL_FILE, BASE_DIR / "www" / PANEL_FILE):
+        if p.is_file():
+            return p
+    return BASE_DIR / PANEL_FILE
 
 
 async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
@@ -35,25 +49,22 @@ async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
     data = hass.data.setdefault(DOMAIN, {})
 
     # Selbsttest: fehlt die Panel-Datei, zeigt HA sonst nur „404: Not Found“
-    panel_file = WWW_DIR / PANEL_FILE
+    panel_file = await hass.async_add_executor_job(_panel_file)
     if not await hass.async_add_executor_job(panel_file.is_file):
         msg = (
             f"Die Panel-Datei fehlt: `{panel_file}`.\n\n"
-            "Bitte prüfen, ob im GitHub-Repository der Ordner "
-            "`custom_components/samsung_ehs_panel/www/` mit `samsung-ehs-hmi800.html` vorhanden ist, "
-            "und die Integration in HACS erneut herunterladen."
+            f"`{PANEL_FILE}` muss direkt im Ordner `custom_components/{DOMAIN}/` liegen "
+            "(oder im Unterordner `www`). Danach Seite neu laden."
         )
         _LOGGER.error(msg)
         persistent_notification.async_create(hass, msg, title="Samsung EHS Panel", notification_id=f"{DOMAIN}_missing")
     else:
         persistent_notification.async_dismiss(hass, f"{DOMAIN}_missing")
 
-    # Statischer Pfad lässt sich nicht wieder abmelden → nur einmal pro HA-Start registrieren
-    if not data.get("static_registered"):
-        await hass.http.async_register_static_paths(
-            [StaticPathConfig(STATIC_URL, str(WWW_DIR), cache_headers=False)]
-        )
-        data["static_registered"] = True
+    # Panel-Datei über eine eigene View ausliefern (zeigt bei Problemen eine Meldung statt „404“)
+    if not data.get("view_registered"):
+        hass.http.register_view(PanelFileView(BASE_DIR))
+        data["view_registered"] = True
 
     # Protokoll von EHS Sentinel mitschreiben + WebSocket-Befehle (einmal pro HA-Start)
     if "logbuffer" not in data:
@@ -77,6 +88,40 @@ async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
     entry.async_on_unload(entry.add_update_listener(_async_reload))
     _LOGGER.debug("Samsung EHS Panel %s unter /%s registriert", VERSION, PANEL_URL_PATH)
     return True
+
+
+class PanelFileView(HomeAssistantView):
+    """Liefert die Panel-Datei unter /<domain>/<datei>."""
+
+    url = STATIC_URL + "/{filename}"
+    name = f"{DOMAIN}:file"
+    requires_auth = False  # das Panel-Iframe lädt ohne Auth-Header; die Daten holt das Panel mit HA-Anmeldung
+
+    def __init__(self, folder: Path) -> None:
+        self._folder = folder
+
+    async def get(self, request: web.Request, filename: str) -> web.StreamResponse:
+        if "/" in filename or "\\" in filename or filename.startswith("."):
+            return web.Response(status=400, text="Ungültiger Dateiname")
+        if not filename.lower().endswith((".html", ".js", ".css", ".png", ".svg", ".json")) or filename in ("manifest.json", "strings.json"):
+            return web.Response(status=404, text="Nicht gefunden")
+        hass = request.app[KEY_HASS]
+        def _find():
+            for p in (self._folder / filename, self._folder / "www" / filename):
+                if p.is_file():
+                    return p
+            return None
+        path = await hass.async_add_executor_job(_find) or (self._folder / filename)
+        if not await hass.async_add_executor_job(path.is_file):
+            listing = await hass.async_add_executor_job(lambda: sorted(p.name for p in self._folder.iterdir()))
+            text = (
+                "Samsung EHS Panel: Datei nicht gefunden\n\n"
+                f"Gesucht: {path}\n"
+                f"Inhalt: {', '.join(listing) or '(leer)'}\n\n"
+                "Lösung: Datei samsung-ehs-hmi800.html in diesen Ordner legen und Seite neu laden."
+            )
+            return web.Response(status=404, text=text, content_type="text/plain", charset="utf-8")
+        return web.FileResponse(path, headers={"Cache-Control": "no-cache"})
 
 
 async def async_unload_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
