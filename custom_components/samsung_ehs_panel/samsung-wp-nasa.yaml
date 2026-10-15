@@ -1,7 +1,13 @@
 # Samsung EHS – ESPHome (Beormund/esphome-samsung-nasa) – erzeugt für das „Samsung EHS Panel“
 # Alle Namen sind so gewählt, dass das Panel die Entitäten automatisch findet. Namen bitte nicht ändern.
-# Indoor = nasa_device_1 (20.00.00), Outdoor = nasa_device_2 (10.00.00)
+# Indoor = nasa_device_1 (${indoor_address}), Outdoor = nasa_device_2 (${outdoor_address}) – werden automatisch geprüft
 # Import external component from GitHub
+substitutions:
+  # Adressen von Innen- und Außengerät. Werden vom ESP am Bus erkannt; das EHS Panel prüft sie und
+  # liefert beim Download der YAML automatisch die erkannten Werte (EHS Panel → Übersicht → ESPHome).
+  indoor_address: "20.00.01"
+  outdoor_address: "10.00.00"
+
 external_components:
   - source: github://beormund/esphome-samsung-nasa@main
     components: [samsung_nasa]
@@ -56,6 +62,46 @@ uart:
   rx_pin: GPIO22
   baud_rate: 9600
   parity: EVEN
+  # Automatische Adress-Erkennung: liest den Bus mit und meldet Innen-/Außengerät an Home Assistant
+  debug:
+    direction: RX
+    dummy_receiver: false
+    after:
+      timeout: 20ms
+    sequence:
+      - lambda: |-
+          static std::vector<uint8_t> buf;
+          static std::map<std::string, uint32_t> seen;
+          static uint32_t last_pub = 0;
+          buf.insert(buf.end(), bytes.begin(), bytes.end());
+          if (buf.size() > 800) buf.erase(buf.begin(), buf.end() - 400);
+          size_t i = 0;
+          while (i + 9 < buf.size()) {
+            if (buf[i] != 0x32) { i++; continue; }
+            uint16_t len = (uint16_t(buf[i + 1]) << 8) | buf[i + 2];
+            if (len < 14 || len > 1500) { i++; continue; }
+            if (i + len + 2 > buf.size()) break;
+            if (buf[i + len + 1] == 0x34) {
+              char a[12];
+              snprintf(a, sizeof(a), "%02x.%02x.%02x", buf[i + 3], buf[i + 4], buf[i + 5]);
+              seen[a]++;
+              i += len + 2;
+            } else {
+              i++;
+            }
+          }
+          buf.erase(buf.begin(), buf.begin() + i);
+          if (millis() - last_pub > 30000) {
+            last_pub = millis();
+            std::string in_best, out_best;
+            uint32_t in_n = 0, out_n = 0;
+            for (auto &kv : seen) {
+              if (kv.first.rfind("20.", 0) == 0 && kv.second > in_n) { in_best = kv.first; in_n = kv.second; }
+              if (kv.first.rfind("10.", 0) == 0 && kv.second > out_n) { out_best = kv.first; out_n = kv.second; }
+            }
+            if (!in_best.empty() && id(nasa_in_found).state != in_best) id(nasa_in_found).publish_state(in_best);
+            if (!out_best.empty() && id(nasa_out_found).state != out_best) id(nasa_out_found).publish_state(out_best);
+          }
 
 ## SAMSUNG NASA CONFIGURATION
 samsung_nasa:
@@ -63,9 +109,9 @@ samsung_nasa:
   debug_log_undefined_messages: false
   nasa_client: {}
   devices:
-   - address: 20.00.00
+   - address: ${indoor_address}
      id: nasa_device_1
-   - address: 10.00.00
+   - address: ${outdoor_address}
      id: nasa_device_2
 
 number:
@@ -803,6 +849,25 @@ binary_sensor:
     name: "Enum Out Load Pheheater"
 
 text_sensor:
+  # --- Adressprüfung (ausgewertet vom EHS Panel in Home Assistant) ---
+  - platform: template
+    id: nasa_in_found
+    name: "NASA Innengerät erkannt"
+    entity_category: diagnostic
+  - platform: template
+    id: nasa_out_found
+    name: "NASA Außengerät erkannt"
+    entity_category: diagnostic
+  - platform: template
+    name: "NASA Innengerät konfiguriert"
+    entity_category: diagnostic
+    update_interval: 1h
+    lambda: return {"${indoor_address}"};
+  - platform: template
+    name: "NASA Außengerät konfiguriert"
+    entity_category: diagnostic
+    update_interval: 1h
+    lambda: return {"${outdoor_address}"};
   - platform: samsung_nasa
     message: 0x4002
     nasa_device_id: nasa_device_1

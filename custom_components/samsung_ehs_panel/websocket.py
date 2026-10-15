@@ -21,6 +21,7 @@ except ImportError:  # sehr alte HA-Versionen
     from homeassistant.const import EVENT_STATE_CHANGED
     EVENT_STATE_REPORTED = None
 
+from .addresses import get_addresses
 from .const import DOMAIN, VERSION, WS_PREFIX
 
 EHS_DOMAIN = "ehs_sentinel"
@@ -85,6 +86,8 @@ async def ws_status(hass: HomeAssistant, connection, msg) -> None:
             "ehs_version": ehs_version,
             "instances": _instances(hass),
             "log_level": buf.current_level() if buf else "default",
+            "addresses": get_addresses(hass),
+            "ff_suppressed": dict(getattr((hass.data.get(DOMAIN) or {}).get("ff_filter"), "counts", {}) or {}),
         },
     )
 
@@ -293,12 +296,15 @@ async def _store_load(hass: HomeAssistant) -> dict:
 async def ws_panel_get(hass: HomeAssistant, connection, msg) -> None:
     d = await _store_load(hass)
     connection.send_result(
-        msg["id"], {"map": d.get("map", {}), "hc_names": d.get("hc_names", {}), "is_admin": connection.user.is_admin}
+        msg["id"],
+        {"map": d.get("map", {}), "hc_names": d.get("hc_names", {}), "profile": d.get("profile"),
+         "is_admin": connection.user.is_admin},
     )
 
 
 @websocket_api.websocket_command(
-    {vol.Required("type"): f"{WS_PREFIX}/panel/save", vol.Optional("map"): dict, vol.Optional("hc_names"): dict}
+    {vol.Required("type"): f"{WS_PREFIX}/panel/save", vol.Optional("map"): dict, vol.Optional("hc_names"): dict,
+     vol.Optional("profile"): vol.Any(dict, None)}
 )
 @websocket_api.require_admin
 @websocket_api.async_response
@@ -308,6 +314,8 @@ async def ws_panel_save(hass: HomeAssistant, connection, msg) -> None:
         d["map"] = {str(k): str(v) for k, v in msg["map"].items() if v}
     if "hc_names" in msg:
         d["hc_names"] = {str(k): str(v) for k, v in msg["hc_names"].items() if v}
+    if "profile" in msg:
+        d["profile"] = msg["profile"]
     await _store(hass).async_save(d)
     connection.send_result(msg["id"], {"ok": True})
 

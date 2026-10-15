@@ -115,6 +115,9 @@ details summary{cursor:pointer;color:var(--dim);font-size:13.5px}
 .sum button{font:inherit;background:var(--card);border:1px solid var(--line);border-radius:var(--r);padding:14px 8px;cursor:pointer;color:var(--dim);text-align:center}
 .sum button b{display:block;font-size:34px;font-weight:400;line-height:1.15;color:var(--txt)}
 .sum button.g b{color:var(--ok)}.sum button.m b{color:var(--err)}.sum button.x b{color:var(--dim)}
+.sum>div{background:var(--card);border:1px solid var(--line);border-radius:var(--r);padding:14px 8px;color:var(--dim);text-align:center}
+.sum>div b{display:block;font-size:34px;font-weight:400;line-height:1.15;color:var(--txt)}.sum>div.on{border-color:var(--acc)}
+.pick .fr input[type=checkbox]{accent-color:var(--acc)}
 .sum button.on{border-color:var(--acc);background:color-mix(in srgb,var(--acc) 14%,var(--card));color:var(--txt)}
 .vcard{display:flex;align-items:center;gap:16px;padding:16px 20px}
 .vcard .tx{flex:1;min-width:0}.vcard .tx b{display:block;font-size:20px;font-weight:400;margin-bottom:2px}.vcard .tx span{color:var(--dim)}
@@ -240,6 +243,7 @@ const st = { tab:(()=>{ try{ return sessionStorage.getItem('ehsm_tab')||'over'; 
              ent:{q:'', f:'all'},
              map:{view:'areas', src:'all', area:null, f:'all', q:'', pick:null, pq:'', verify:null, verifying:false},
              cat:null, repo:null, repoBy:{}, esp:null, espByName:{}, pmap:{}, pmapAdmin:true,
+             profile:undefined, absent:new Set(), showAll:false, wiz:{open:false, step:'intro', res:null, opts:{}},
              status:null, err:null, sel:null, cfg:null, cfgFor:null, form:null, cfgMsg:null, busy:false,
              log:{tab:'log', level:'all', data:null, err:null, pause:false, file:null} };
 
@@ -279,6 +283,17 @@ const A = []; const act = fn => (A.push(fn), A.length-1);
 function row(icon,k,v){ return `<div class="r"><span class="k">${IC[icon]||''}${esc(k)}</span><span class="v">${v}</span></div>`; }
 function actBtn(icon,title,sub,fn,cls=''){ return `<button class="act" data-a="${act(fn)}"><span class="ic ${cls}">${IC[icon]}</span><span>${esc(title)}${sub?`<small>${esc(sub)}</small>`:''}</span></button>`; }
 
+function addrCard(A){
+  if(!A) return '';
+  const e = A.esp||{}, eh = (A.ehs||[])[0]||{};
+  const line = (unit, conf, found, ehs) => {
+    const ok = conf && found ? conf===found : null;
+    const pill = ok===true ? '<span class="pill ok">passt</span>' : ok===false ? '<span class="pill no">falsch</span>' : '<span class="pill" style="background:var(--card2);color:var(--dim)">offen</span>';
+    return `<div class="r"><span class="k">${IC.link}<span>${unit}<small style="display:block;color:var(--dim);font-size:12.5px">ESPHome ${esc(conf||'–')}${found?` · Bus ${esc(found)}`:''}${ehs?` · EHS Sentinel ${esc(ehs)}`:''}</small></span></span><span class="v">${pill}</span></div>`;
+  };
+  const warn = (A.mismatch||[]).length ? `<div class="msg err" style="margin:10px 16px">Falsche Adresse in der ESPHome-Konfiguration. YAML unten herunterladen (enthält die erkannten Adressen) und den ESP neu flashen.</div>` : '';
+  return `<div class="card rows">${line('Innengerät', e.in_conf, e.in_found||eh.indoor, eh.indoor)}${line('Außengerät', e.out_conf, e.out_found||eh.outdoor, eh.outdoor)}</div>${warn}`;
+}
 function updCard(label, u, installed){
   if(!u) return `<div class="card pad hero"><b>${esc(label)}</b>Installiert: <b style="display:inline">${esc(installed||'–')}</b><br><span style="color:var(--dim);font-size:13px">Keine HACS-Update-Entität gefunden.</span></div>`;
   const a = u.s.attributes, avail = u.s.state==='on';
@@ -308,8 +323,9 @@ function render(){
     ${U.panel ? updCard('Samsung EHS Panel', U.panel, S.version) : ''}
     ${actBtn('panel','Panel öffnen','Samsung-Bedieneinheit',()=>openHA('/samsung-ehs'))}
     <h2>${IC.chip}ESPHome (Beormund)</h2>
+    ${addrCard(S.addresses)}
     <div class="card rows">${row('info','Erkannte ESPHome-Werte',String(ents.filter(e=>!/ehssentinel/.test(e.id)).length)+' von '+Object.keys(st.esp||{}).length)}${row('link','Projekt','<a href="https://github.com/Beormund/esphome-samsung-nasa" target="_blank" rel="noopener" style="color:var(--acc)">esphome-samsung-nasa</a>')}</div>
-    <a class="act" href="samsung-wp-nasa.yaml" download style="text-decoration:none"><span class="ic">${IC.dl}</span><span>ESPHome-YAML herunterladen<small>Alternative zu EHS Sentinel: ESP32 + RS485 an F1/F2 – Namen nicht ändern</small></span></a>
+    <a class="act" href="samsung-wp-nasa.yaml" download style="text-decoration:none"><span class="ic">${IC.dl}</span><span>ESPHome-YAML herunterladen<small>${S.addresses&&(S.addresses.indoor||S.addresses.outdoor)?`Mit erkannten Adressen: innen ${esc(S.addresses.indoor||'–')} · außen ${esc(S.addresses.outdoor||'–')}`:'ESP32 + RS485 an F1/F2 – Namen nicht ändern'}</small></span></a>
   </div>`;
 
   // Spalte 2: Schnittstelle
@@ -337,7 +353,12 @@ function render(){
   c2 += `</div>`;
 
   // Spalte 3: System
-  let c3 = `<div class="col"><h2>${IC.info}System</h2>`;
+  const P = st.profile;
+  let c3 = `<div class="col"><h2>${IC.chip}Anlage</h2>
+    <div class="card rows">${row('info','Anlagenprofil', !P||P.skipped ? 'nicht eingerichtet' : (P.active!==false?'<span class="pill ok">aktiv</span>':'<span class="pill" style="background:var(--card2);color:var(--dim)">aus</span>'))}${P&&!P.skipped?row('list','Ausgeblendet', `${(P.absent||[]).length} von ${P.total||'–'} Werten`)+row('info','Abgefragt', new Date(P.created).toLocaleString('de-DE')):''}</div>
+    ${actBtn('ref','Anlage abfragen','Nur Werte anzeigen, die deine Anlage wirklich hat',()=>{ st.wiz={open:true,step:'intro',res:null,opts:{}}; render(); })}
+    ${P&&!P.skipped?actBtn('panel',P.active!==false?'Profil ausschalten':'Profil einschalten',P.active!==false?'Wieder alle Werte anzeigen':'Nur vorhandene Werte anzeigen',profToggle):''}
+    <h2>${IC.info}System</h2>`;
   if(inst){
     const s = inst.stats||{};
     const pill = !inst.loaded ? '<span class="pill dm">Nicht geladen</span>' : inst.connected ? '<span class="pill ok">Verbunden</span>' : '<span class="pill no">Getrennt</span>';
@@ -390,9 +411,10 @@ function render(){
     </div><div class="lbody" id="lbody">${lb}</div></div></div>`;
 
   const tabBtn = (k,ic,l,cnt) => `<button class="${st.tab===k?'on':''}" data-a="${act(()=>setTab(k))}">${IC[ic]}${l}${cnt!=null?`<span class="cnt">${cnt}</span>`:''}</button>`;
-  const nSet = ents.filter(e=>EDIT[e.dom]).length, nMes = ents.length - nSet;
+  const vEnts = visEnts(ents);
+  const nSet = vEnts.filter(e=>EDIT[e.dom]).length, nMes = vEnts.length - nSet;
   const tabs = `<div class="tabs" role="tablist">${tabBtn('over','info','Übersicht')}${tabBtn('set','chip','Einstellungen',nSet)}${tabBtn('mes','pulse','Messwerte',nMes)}${tabBtn('ent','link','Zuordnung',(st.map.src==='all'&&st.repo)?st.repo.length:(st.cat?st.cat.length:null))}${tabBtn('log','list','Protokoll')}</div>`;
-  const body = st.tab==='set' ? cardsHtml(ents,'set') : st.tab==='mes' ? cardsHtml(ents,'mes') : st.tab==='ent' ? (st.map.view==='raw' ? `<button class="back" data-a="${act(()=>{ st.map.view='areas'; render(); })}">‹ Entitäten-Zuordnung</button>`+entHtml(ents) : mapHtml(ents)) : st.tab==='log' ? log : `<div class="grid">${c1}${c2}${c3}</div>`;
+  const body = st.wiz.open && hass && st.repo ? wizHtml() : st.tab==='set' ? profBar()+cardsHtml(vEnts,'set') : st.tab==='mes' ? profBar()+cardsHtml(vEnts,'mes') : st.tab==='ent' ? (st.map.view==='areas'?profBar():'')+ (st.map.view==='raw' ? `<button class="back" data-a="${act(()=>{ st.map.view='areas'; render(); })}">‹ Entitäten-Zuordnung</button>`+entHtml(ents) : mapHtml(ents)) : st.tab==='log' ? log : `<div class="grid">${c1}${c2}${c3}</div>`;
   const lbOld = $('#lbody'), scroll = lbOld ? lbOld.scrollTop : 0;
   const ewOld = $('#ewrap'), escroll = ewOld ? ewOld.scrollTop : 0;
   const focus = document.activeElement && document.activeElement.dataset ? document.activeElement.dataset.k : null;
@@ -403,8 +425,9 @@ function render(){
   bind();
 }
 function bind(){
-  if(st.tab==='ent'){ entBind(); mapBind(); }
-  if(st.tab==='set'||st.tab==='mes') cardsBind();
+  if(st.wiz.open) document.querySelectorAll('[data-opt]').forEach(cb=>cb.addEventListener('change',()=>{ st.wiz.opts[cb.dataset.opt]=cb.checked; wizCount(); render(); }));
+  if(!st.wiz.open && st.tab==='ent'){ entBind(); mapBind(); }
+  if(!st.wiz.open && (st.tab==='set'||st.tab==='mes')) cardsBind();
   document.querySelectorAll('[data-a]').forEach(el=>el.addEventListener('click',ev=>{ ev.preventDefault(); const f=A[+el.dataset.a]; if(f) f(); }));
   document.querySelectorAll('#cfg [data-k]').forEach(el=>{
     const upd = () => { st.form[el.dataset.k] = el.type==='checkbox' ? el.checked : el.type==='number' ? (el.value===''?'':+el.value) : el.value; };
@@ -421,6 +444,100 @@ function espObj(id, s){
   if(!st.esp) return null; const fn = String(s.attributes.friendly_name||'').toLowerCase();
   for(const [n,o] of Object.entries(st.espByName)) if(fn===n || fn.endsWith(' '+n)) return o;
   return null;
+}
+/* ---------- Anlagenprofil: nur vorhandene Werte anzeigen ---------- */
+function setProfile(p){ st.profile = p; st.absent = new Set(p && p.active!==false ? (p.absent||[]) : []); }
+const profOn = () => !!(st.profile && st.profile.active!==false && !st.profile.skipped);
+const hidden = id => profOn() && !st.showAll && st.absent.has(id);
+const visEnts = ents => ents.filter(e=>!hidden(e.id));
+const OPT_RX = { dhw:/dhw|tank|waterheater|fsv30\d\d|disinfect|legionell/i, hc2:/zone2|z2|hc2|zone_2/i, ahu:/ahu/i, booster:/booster|backup|bu\d|fsv40[2-4]\d/i };
+const OPT_TXT = { dhw:['Warmwasserspeicher','Speicher, Warmwasserbereitung, Desinfektion (FSV 30xx)'],
+  hc2:['2. Heizkreis / Zone 2','Werte und Einstellungen für den zweiten Heizkreis'],
+  booster:['Elektrischer Zusatzheizer','Heizstab im Innengerät oder Speicher (Backup-/Booster-Heizer)'],
+  ahu:['Lüftungsgerät (AHU)','Werte eines angeschlossenen Samsung-Lüftungsgeräts'] };
+function classify(e, answered, ff){
+  const v = e.s.state, o = objOf(e.id), rp = st.repoBy[o];
+  if(rp && ff.has(rp.k)) return 'Bauteil nicht vorhanden (0xFF)';
+  if(BAD(v)) return answered && answered.has(e.id) ? 'kein gültiger Wert' : 'keine Antwort';
+  const n = Number(v), u = e.s.attributes.unit_of_measurement||'';
+  if(!isNaN(n) && /°C/.test(u) && n <= -50) return 'Fühler nicht angeschlossen';
+  if(!isNaN(n) && [3276.7,-3276.8,32767,-32768,6553.5,65535].includes(n)) return 'kein Messwert';
+  return null;
+}
+function wizHtml(){
+  const W = st.wiz, ents = ehsEntities();
+  const head = `<div class="mapw pick"><h1>Anlage einrichten</h1><div class="bar"></div>`;
+  if(W.step==='run') return head+`<div class="vcard"><div class="vt"><b>Anlage wird abgefragt …</b><small>Alle ${ents.length} Werte werden bei der Wärmepumpe angefragt und ausgewertet. Das dauert bis zu 90 Sekunden.</small></div></div></div>`;
+  if(W.step==='res' && W.res){
+    const R = W.res, groups = Object.entries(R.groups).sort((a,b)=>b[1].p-a[1].p);
+    const opt = k => `<label class="fr" style="cursor:pointer"><div class="tx"><b>${OPT_TXT[k][0]}</b><small>${OPT_TXT[k][1]}${R.det[k]!=null?` · erkannt: ${R.det[k]?'ja':'nein'}`:''}</small></div>
+      <input type="checkbox" data-opt="${k}" ${W.opts[k]?'checked':''} style="width:22px;height:22px"></label>`;
+    return head+`<div class="sum">
+      <div class="on"><b>${R.present}</b>Vorhanden</div><div><b style="color:var(--dim)">${R.absent}</b>Ausblenden</div><div><b>${R.total}</b>Gesamt</div><div><b style="color:var(--ok)">${R.answered}</b>Antworten</div></div>
+      <div class="lb" style="margin-top:18px">Ausstattung deiner Anlage</div>
+      <div class="card">${['dhw','hc2','booster','ahu'].map(opt).join('')}</div>
+      <div class="expl">Nicht gewählte Ausstattung wird zusätzlich ausgeblendet. Werte ohne Antwort, mit 0xFF („nicht vorhanden“) oder mit offenem Fühler (−50 °C) werden automatisch ausgeblendet.</div>
+      <div class="lb">Ergebnis je Bereich</div>
+      <div class="card">${groups.map(([g,c])=>`<div class="fr"><div class="tx"><b>${esc(g)}</b><small>${c.p} vorhanden · ${c.a} ausgeblendet</small></div></div>`).join('')}</div>
+      <div class="bb3"><button data-a="${act(()=>{ W.step='intro'; render(); })}">Zurück</button><button data-a="${act(wizRun)}">Erneut abfragen</button><button class="pri" data-a="${act(wizSave)}">Übernehmen</button></div></div>`;
+  }
+  return head+`<div class="expl" style="text-align:left">Das EHS Panel fragt jetzt alle Werte direkt bei deiner Wärmepumpe an und erkennt, welche Bauteile und Funktionen deine Anlage wirklich hat. Danach zeigen Einstellungen, Messwerte, Zuordnung und das Samsung-Panel nur noch diese an. Ausgeblendete Werte lassen sich jederzeit wieder einblenden.<br><br>Es wird nichts verändert – die Abfrage liest nur.</div>
+    <div class="bb3"><button data-a="${act(wizSkip)}">Überspringen</button><button data-a="${act(()=>{ st.wiz.open=false; render(); })}" ${st.profile?'':'style="visibility:hidden"'}>Abbrechen</button><button class="pri" data-a="${act(wizRun)}">Anlage jetzt abfragen</button></div></div>`;
+}
+async function wizRun(){
+  const W = st.wiz; W.step='run'; render();
+  const ents = ehsEntities(), ids = ents.filter(e=>/ehssentinel/.test(e.id)).map(e=>e.id);
+  let answered = new Set();
+  try{ const r = await send({type:WS+'verify', entity_ids:ids, entry_id:st.sel||undefined, timeout:90}); answered = new Set(r.answered||[]); }
+  catch(e){ toast(errText(e)); }
+  await loadStatus(); hass = getHass()||hass;
+  const ff = new Set(Object.keys((st.status && st.status.ff_suppressed)||{}));
+  const res = {total:0, present:0, absent:0, answered:answered.size, groups:{}, auto:[], presentIds:[], det:{}};
+  for(const e of ehsEntities()){
+    const why = classify(e, answered, ff), rp = st.repoBy[objOf(e.id)], g = rp ? rp.g : 'Weitere';
+    res.total++; res.groups[g] = res.groups[g] || {p:0,a:0};
+    if(why){ res.auto.push(e.id); } else res.presentIds.push(e.id);
+  }
+  const has = rx => res.presentIds.some(id=>rx.test(objOf(id)) && !EDIT[id.split('.')[0]]);
+  res.det = { dhw: has(/dhw.*(temp|current)|tank/i), hc2: has(/zone2|z2/i), booster: has(/booster|backupheater/i), ahu: res.presentIds.some(id=>{ const rp=st.repoBy[objOf(id)]; return rp && /AHU/.test(rp.g); }) };
+  W.opts = Object.assign({dhw:true,hc2:false,booster:false,ahu:false}, res.det);
+  W.res = res; wizCount(); W.step='res'; render();
+}
+function wizAbsent(){
+  const W = st.wiz, R = W.res, out = new Set(R.auto);
+  for(const k of Object.keys(OPT_RX)) if(!W.opts[k]) for(const id of R.presentIds){
+    const rp = st.repoBy[objOf(id)];
+    if(OPT_RX[k].test(objOf(id)) || (k==='ahu' && rp && /AHU/.test(rp.g))) out.add(id);
+  }
+  return out;
+}
+function wizCount(){
+  const R = st.wiz.res, ab = wizAbsent(); R.absent = ab.size; R.present = R.total - ab.size;
+  for(const g in R.groups) R.groups[g] = {p:0,a:0};
+  for(const e of ehsEntities()){ const rp = st.repoBy[objOf(e.id)], g = rp ? rp.g : 'Weitere'; if(!R.groups[g]) R.groups[g]={p:0,a:0}; ab.has(e.id) ? R.groups[g].a++ : R.groups[g].p++; }
+}
+async function wizSave(){
+  const W = st.wiz, ab = [...wizAbsent()];
+  const p = {v:1, active:true, created:new Date().toISOString(), absent:ab, total:W.res.total, opts:W.opts};
+  try{ await send({type:WS+'panel/save', profile:p}); setProfile(p); W.open=false; st.showAll=false; toast(`Profil gespeichert – ${ab.length} Werte ausgeblendet`); }
+  catch(e){ toast(errText(e)); }
+  render();
+}
+async function wizSkip(){
+  const p = {v:1, active:false, skipped:true, created:new Date().toISOString(), absent:[]};
+  try{ await send({type:WS+'panel/save', profile:p}); }catch(e){}
+  setProfile(p); st.wiz.open=false; render();
+}
+async function profToggle(){
+  const p = Object.assign({}, st.profile, {active: !(st.profile.active!==false)});
+  try{ await send({type:WS+'panel/save', profile:p}); setProfile(p); render(); }catch(e){ toast(errText(e)); }
+}
+function profBar(){
+  if(!profOn()) return '';
+  return `<div class="msg info" style="margin:0 0 14px;display:flex;gap:12px;align-items:center;flex-wrap:wrap">
+    <span style="flex:1">Anlagenprofil aktiv · <b>${st.absent.size}</b> Werte ausgeblendet</span>
+    <button class="chip ${st.showAll?'on':''}" data-a="${act(()=>{ st.showAll=!st.showAll; render(); })}">${st.showAll?'Ausgeblendete werden angezeigt':'Ausgeblendete anzeigen'}</button>
+    <button class="chip" data-a="${act(()=>{ st.wiz={open:true,step:'intro',res:null,opts:{}}; render(); })}">Anlage neu abfragen</button></div>`;
 }
 function ehsEntities(){
   const reg = hass.entities || {}, out = [];
@@ -599,7 +716,8 @@ async function loadMapData(){
   try{ const r = await fetch('ehs-repo.json?v='+Date.now()); const j = await r.json(); st.repoSrc = j.source||'';
        st.repo = (j.entities||[]).map(e=>({label: e.l || e.desc || prettyKey(e.k), area:e.g, target:(e.w||e.d)+'.samsung_ehssentinel_'+e.o, ids:[], repo:e}));
        st.repo.forEach(f=>st.repoBy[f.repo.o]=f.repo); }catch(e){ st.repo = []; }
-  try{ const r = await send({type:WS+'panel/get'}); st.pmap = r.map||{}; st.pmapAdmin = !!r.is_admin; }
+  try{ const r = await send({type:WS+'panel/get'}); st.pmap = r.map||{}; st.pmapAdmin = !!r.is_admin; setProfile(r.profile||null);
+       if(!r.profile && st.pmapAdmin) st.wiz.open = true; }
   catch(e){ try{ st.pmap = JSON.parse(localStorage.getItem('ehs800.map')||'{}'); }catch(_){ st.pmap = {}; } }
 }
 function resolveT(t, ents){
@@ -627,7 +745,7 @@ function espSet(){
 function curSet(){ return st.map.src==='panel' ? (st.cat||[]) : st.map.src==='esp' ? espSet() : (st.repo||[]); }
 function mapHtml(ents){
   if(!st.cat || !st.repo) return `<div class="empty">Lade Funktionsliste …</div>`;
-  const M = st.map, all = curSet().map(f=>fnInfo(f, ents));
+  const M = st.map, all = curSet().map(f=>fnInfo(f, ents)).filter(x=>!(x.r && hidden(x.r)) && !(profOn() && !st.showAll && M.src!=='panel' && x.status==='missing'));
   const cnt = k => k==='all' ? all.length : all.filter(x=>x.status===k).length;
   const q = M.q.trim().toLowerCase();
   const pass = x => (M.f==='all' || x.status===M.f) && (!q || (x.f.label+' '+(x.r||x.t)+' '+x.f.area).toLowerCase().includes(q));

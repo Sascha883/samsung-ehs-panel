@@ -375,7 +375,7 @@ const ENTITY_OVERRIDES = Object.assign({}, SAMSUNG_MAP, {
 const INSTALLER = { name:"Sascha Matheis Haustechnik", addr:"Segelbreite 27, 34314 Espenau", tel:"" };
 const HEATING_CIRCUITS = [1,2,3,4];  // werden nur angezeigt, wenn thermostat_hcX_* existiert
 const SERVICE_PIN = "";               // leer = Servicemenü ohne PIN, z.B. "1234"
-const PANEL_VERSION = "1.5.0";   // bei jeder neuen Version erhöhen (Upload im EMS-ESP Manager)
+const PANEL_VERSION = "1.6.0";   // bei jeder neuen Version erhöhen (Upload im EMS-ESP Manager)
 
 // Vom EMS-ESP Manager beim Ausliefern gesetzt (nicht von Hand eintragen)
 const MGR = window.EMS_ESP_MANAGER || null;
@@ -415,6 +415,7 @@ async function loadMgr(){
     if(r.is_admin && !Object.keys(r.map||{}).length && Object.keys(localMap).length){ r.map = localMap; await mgrSave({map:localMap}); }
     if(r.is_admin && !Object.keys(r.hc_names||{}).length && Object.keys(localHc).length){ r.hc_names = localHc; await mgrSave({hc_names:localHc}); }
     userMap = Object.assign({}, ENTITY_OVERRIDES, r.map||{});
+    PROFILE_ABSENT = new Set(r.profile && r.profile.active!==false && !r.profile.skipped ? (r.profile.absent||[]) : []);
     LS.set('map', r.map||{});
     settings.hcNames = Object.assign({}, r.hc_names||{}); LS.set('settings',settings);
     if(MGR) MGR.is_admin = !!r.is_admin;
@@ -508,7 +509,8 @@ function R(id){                  // Entität auflösen
   resolved[id] = cand||null;
   return cand||id;
 }
-function has(id){ const r=R(id); return !!S[r] && S[r].state!=='unavailable' && !(r.includes('ehssentinel') && S[r].state==='unknown' && !/^(number|select|switch)\./.test(r)); }
+let PROFILE_ABSENT = new Set();
+function has(id){ const r=R(id); if(SAM_MODE && PROFILE_ABSENT.has(r)) return false; return !!S[r] && S[r].state!=='unavailable' && !(r.includes('ehssentinel') && S[r].state==='unknown' && !/^(number|select|switch)\./.test(r)); }
 function st(id){ const r=R(id), e=S[r]; if(!e) return null; let v=e.state;
   if(SAM_MODE && ESP_IDS.has(r)){ const o=String(r);
     if(/^switch\./.test(o) && /^(select\.thermostat_hc1_mode|select\.thermostat_hc2_mode)$/.test(id)) v = v==='on'?'ON':v==='off'?'OFF':v;

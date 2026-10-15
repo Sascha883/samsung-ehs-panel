@@ -15,6 +15,8 @@ except ImportError:  # ältere HA-Versionen
 from homeassistant.config_entries import ConfigEntry
 from homeassistant.core import HomeAssistant
 
+from . import addresses as panel_addr
+from . import logfilter as panel_logfilter
 from . import websocket as panel_ws
 from .logbuffer import EhsLogBuffer
 
@@ -78,6 +80,15 @@ async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
         panel_ws.async_register(hass)
         data["ws_registered"] = True
 
+    # Log-Flut von EHS Sentinel bei 0xFF-Werten (Bauteil nicht vorhanden) ausblenden
+    _flt = panel_logfilter.install()
+    hass.data.setdefault(DOMAIN, {})["ff_filter"] = _flt
+    entry.async_on_unload(lambda: panel_logfilter.uninstall(_flt))
+
+    # Automatische Prüfung der Innen-/Außengeräte-Adressen (ESPHome)
+    for unsub in panel_addr.async_start(hass):
+        entry.async_on_unload(unsub)
+
     opts = {**entry.data, **entry.options}
     frontend.async_register_built_in_panel(
         hass,
@@ -139,6 +150,11 @@ class PanelFileView(HomeAssistantView):
                 "Lösung: Datei samsung-ehs-hmi800.html in diesen Ordner legen und Seite neu laden."
             )
             return web.Response(status=404, text=text, content_type="text/plain", charset="utf-8")
+        if filename.lower().endswith(".yaml"):
+            text = await hass.async_add_executor_job(path.read_text, "utf-8")
+            text = panel_addr.yaml_with_addresses(text, panel_addr.get_addresses(hass))
+            return web.Response(text=text, content_type="text/yaml", charset="utf-8",
+                                headers={"Content-Disposition": f'attachment; filename="{filename}"', "Cache-Control": "no-cache"})
         return web.FileResponse(path, headers={"Cache-Control": "no-cache"})
 
 
