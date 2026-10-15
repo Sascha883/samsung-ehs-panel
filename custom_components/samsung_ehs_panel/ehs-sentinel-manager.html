@@ -110,7 +110,10 @@ details summary{cursor:pointer;color:var(--dim);font-size:13.5px}
 .sbox select{width:100%;background:transparent;border:0;color:var(--txt);font:inherit;padding:2px 0 4px;appearance:auto}
 .sbox select option{background:var(--card);color:var(--txt)}
 .mapw h1{font-size:24px;font-weight:400;text-align:center;margin:4px 0 14px}
-.mapw .bar{height:3px;border-radius:2px;background:var(--acc);margin-bottom:18px}
+.mapw .bar,.pick .bar{height:3px;border-radius:2px;background:linear-gradient(90deg,#ff1744,#ff9100,#ffea00,#00e676,#00b0ff,#2979ff,#d500f9);margin-bottom:18px}
+.prog{height:8px;border-radius:4px;background:var(--card2);overflow:hidden;margin-top:10px}
+.prog i{display:block;height:100%;width:0;border-radius:4px;background:linear-gradient(90deg,#ff1744,#ff9100,#ffea00,#00e676,#00b0ff,#2979ff,#d500f9);background-size:980px 100%;transition:width .45s ease}
+.progt{display:flex;justify-content:space-between;margin-top:6px;font-size:13.5px;color:var(--dim)}
 .sum{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-bottom:14px}
 .sum button{font:inherit;background:var(--card);border:1px solid var(--line);border-radius:var(--r);padding:14px 8px;cursor:pointer;color:var(--dim);text-align:center}
 .sum button b{display:block;font-size:34px;font-weight:400;line-height:1.15;color:var(--txt)}
@@ -148,7 +151,7 @@ details summary{cursor:pointer;color:var(--dim);font-size:13.5px}
 .pick .hd h1{margin:0;font-size:26px;font-weight:400;text-align:center}
 .pick .hd button{background:none;border:0;color:var(--txt);cursor:pointer;padding:4px;display:grid;place-items:center}
 .pick .hd button svg{width:28px;height:28px}
-.pick .bar{height:3px;border-radius:2px;background:var(--acc);margin:10px 0 18px}
+.pick .bar{margin:10px 0 18px}
 .pick .lb{color:var(--dim);font-size:15px;margin:16px 0 6px}
 .pick .fn{font-size:22px;display:flex;align-items:center;gap:10px;flex-wrap:wrap}
 .pick .fn .pill{font-size:15px;padding:3px 12px}
@@ -414,7 +417,7 @@ function render(){
   const vEnts = visEnts(ents);
   const nSet = vEnts.filter(e=>EDIT[e.dom]).length, nMes = vEnts.length - nSet;
   const tabs = `<div class="tabs" role="tablist">${tabBtn('over','info','Übersicht')}${tabBtn('set','chip','Einstellungen',nSet)}${tabBtn('mes','pulse','Messwerte',nMes)}${tabBtn('ent','link','Zuordnung',(st.map.src==='all'&&st.repo)?st.repo.length:(st.cat?st.cat.length:null))}${tabBtn('log','list','Protokoll')}</div>`;
-  const body = st.wiz.open && hass && st.repo ? wizHtml() : st.tab==='set' ? profBar()+cardsHtml(vEnts,'set') : st.tab==='mes' ? profBar()+cardsHtml(vEnts,'mes') : st.tab==='ent' ? (st.map.view==='areas'?profBar():'')+ (st.map.view==='raw' ? `<button class="back" data-a="${act(()=>{ st.map.view='areas'; render(); })}">‹ Entitäten-Zuordnung</button>`+entHtml(ents) : mapHtml(ents)) : st.tab==='log' ? log : `<div class="grid">${c1}${c2}${c3}</div>`;
+  const body = st.wiz.open && hass && st.repo ? wizHtml() : st.tab==='set' ? profBar('set')+cardsHtml(vEnts,'set') : st.tab==='mes' ? profBar('mes')+cardsHtml(vEnts,'mes') : st.tab==='ent' ? (st.map.view==='areas'?profBar():'')+ (st.map.view==='raw' ? `<button class="back" data-a="${act(()=>{ st.map.view='areas'; render(); })}">‹ Entitäten-Zuordnung</button>`+entHtml(ents) : mapHtml(ents)) : st.tab==='log' ? log : `<div class="grid">${c1}${c2}${c3}</div>`;
   const lbOld = $('#lbody'), scroll = lbOld ? lbOld.scrollTop : 0;
   const ewOld = $('#ewrap'), escroll = ewOld ? ewOld.scrollTop : 0;
   const focus = document.activeElement && document.activeElement.dataset ? document.activeElement.dataset.k : null;
@@ -449,7 +452,14 @@ function espObj(id, s){
 function setProfile(p){ st.profile = p; st.absent = new Set(p && p.active!==false ? (p.absent||[]) : []); }
 const profOn = () => !!(st.profile && st.profile.active!==false && !st.profile.skipped);
 const hidden = id => profOn() && !st.showAll && st.absent.has(id);
-const visEnts = ents => ents.filter(e=>!hidden(e.id));
+function assignedIds(ents){
+  if(!st.cat) return null;
+  const set = new Set();
+  for(const f of st.cat){ const x = fnInfo(f, ents); if(x.r && x.status==='found') set.add(x.r); }
+  return set;
+}
+const visEnts = ents => { if(st.showAll) return ents; const a = assignedIds(ents);
+  return ents.filter(e=>!hidden(e.id) && (!a || a.has(e.id))); };
 const OPT_RX = { dhw:/dhw|tank|waterheater|fsv30\d\d|disinfect|legionell/i, hc2:/zone2|z2|hc2|zone_2/i, ahu:/ahu/i, booster:/booster|backup|bu\d|fsv40[2-4]\d/i };
 const OPT_TXT = { dhw:['Warmwasserspeicher','Speicher, Warmwasserbereitung, Desinfektion (FSV 30xx)'],
   hc2:['2. Heizkreis / Zone 2','Werte und Einstellungen für den zweiten Heizkreis'],
@@ -467,7 +477,7 @@ function classify(e, answered, ff){
 function wizHtml(){
   const W = st.wiz, ents = ehsEntities();
   const head = `<div class="mapw pick"><h1>Anlage einrichten</h1><div class="bar"></div>`;
-  if(W.step==='run') return head+`<div class="vcard"><div class="vt"><b>Anlage wird abgefragt …</b><small>Alle ${ents.length} Werte werden bei der Wärmepumpe angefragt und ausgewertet. Das dauert bis zu 90 Sekunden.</small></div></div></div>`;
+  if(W.step==='run') return head+`<div class="card vcard" style="display:block"><div class="tx"><b>Anlage wird abgefragt …</b><span>Alle ${ents.length} Werte werden bei der Wärmepumpe angefragt und ausgewertet. Das dauert bis zu 90 Sekunden.</span></div>${progHtml('Abfrage läuft')}</div></div>`;
   if(W.step==='res' && W.res){
     const R = W.res, groups = Object.entries(R.groups).sort((a,b)=>b[1].p-a[1].p);
     const opt = k => `<label class="fr" style="cursor:pointer"><div class="tx"><b>${OPT_TXT[k][0]}</b><small>${OPT_TXT[k][1]}${R.det[k]!=null?` · erkannt: ${R.det[k]?'ja':'nein'}`:''}</small></div>
@@ -488,8 +498,10 @@ async function wizRun(){
   const W = st.wiz; W.step='run'; render();
   const ents = ehsEntities(), ids = ents.filter(e=>/ehssentinel/.test(e.id)).map(e=>e.id);
   let answered = new Set();
+  progStart(ids, 90); render();
   try{ const r = await send({type:WS+'verify', entity_ids:ids, entry_id:st.sel||undefined, timeout:90}); answered = new Set(r.answered||[]); }
   catch(e){ toast(errText(e)); }
+  progStop();
   await loadStatus(); hass = getHass()||hass;
   const ff = new Set(Object.keys((st.status && st.status.ff_suppressed)||{}));
   const res = {total:0, present:0, absent:0, answered:answered.size, groups:{}, auto:[], presentIds:[], det:{}};
@@ -532,7 +544,13 @@ async function profToggle(){
   const p = Object.assign({}, st.profile, {active: !(st.profile.active!==false)});
   try{ await send({type:WS+'panel/save', profile:p}); setProfile(p); render(); }catch(e){ toast(errText(e)); }
 }
-function profBar(){
+function profBar(kind){
+  const ents = ehsEntities(), a = assignedIds(ents), all = kind ? ents.filter(e=>kind==='set' ? EDIT[e.dom] : !EDIT[e.dom]) : ents;
+  const shown = visEnts(all).length;
+  if(kind) return `<div class="msg info" style="margin:0 0 14px;display:flex;gap:12px;align-items:center;flex-wrap:wrap">
+    <span style="flex:1">${st.showAll ? `Alle <b>${all.length}</b> Werte werden angezeigt` : `Nur in der Zuordnung gefundene Werte · <b>${shown}</b> von ${all.length}`}${profOn()?` · Anlagenprofil aktiv`:''}</span>
+    <button class="chip ${st.showAll?'on':''}" data-a="${act(()=>{ st.showAll=!st.showAll; render(); })}">${st.showAll?'Nur zugeordnete anzeigen':'Alle anzeigen'}</button>
+    <button class="chip" data-a="${act(()=>setTab('ent'))}">Zur Zuordnung</button></div>`;
   if(!profOn()) return '';
   return `<div class="msg info" style="margin:0 0 14px;display:flex;gap:12px;align-items:center;flex-wrap:wrap">
     <span style="flex:1">Anlagenprofil aktiv · <b>${st.absent.size}</b> Werte ausgeblendet</span>
@@ -751,7 +769,7 @@ function mapHtml(ents){
   const pass = x => (M.f==='all' || x.status===M.f) && (!q || (x.f.label+' '+(x.r||x.t)+' '+x.f.area).toLowerCase().includes(q));
   const sumBtn = (k,cls) => `<button class="${cls} ${M.f===k?'on':''}" data-a="${act(()=>{ M.f=k; render(); })}"><b>${cnt(k)}</b>${STL[k]}</button>`;
   const v = M.verify;
-  const vres = M.verifying ? `<div class="res" style="color:var(--dim)">Werte werden bei der Wärmepumpe angefragt … (bis zu ${curSet().length>250?90:25} s)</div>`
+  const vres = M.verifying ? progHtml('Werte werden bei der Wärmepumpe angefragt')
     : M.verifying===undefined ? '' : v ? `<div class="res"><span style="color:var(--ok)">✓ ${v.answered.size} antworten</span> · <span style="color:var(--warn)">✗ ${v.missing.size} ohne Antwort</span>${v.noKey?` · ${v.noKey} nicht anfragbar`:''} <span style="color:var(--dim)">(${v.time})</span>${v.errors.length?`<br><span style="color:var(--err)">${esc(v.errors.join(' '))}</span>`:''}</div>` : '';
   const seg = (k,l,n) => `<button class="chip ${M.src===k?'on':''}" data-a="${act(()=>{ M.src=k; M.view='areas'; M.verify=null; render(); })}">${l} · ${n}</button>`;
   let html = `<div class="mapw"><h1>Entitäten-Zuordnung</h1><div class="bar"></div>
@@ -851,14 +869,41 @@ async function saveMapFor(f, eid){
        toast(eid ? 'Zugeordnet – gilt sofort im Samsung-Panel (Seite dort neu laden)' : 'Standard wiederhergestellt'); st.map.view = st.map.area?'area':'areas'; render(); }
   catch(e){ toast(errText(e)); }
 }
+/* ---------- Fortschrittsbalken für Abfragen ---------- */
+function progStart(ids, timeout){
+  progStop();
+  st.prog = {ids:[...ids], t0:Date.now(), timeout:timeout*1000, got:0};
+  st.prog.timer = setInterval(progTick, 400);
+}
+function progStop(){ if(st.prog && st.prog.timer) clearInterval(st.prog.timer); st.prog = null; }
+function progCalc(){
+  const P = st.prog; if(!P) return {pct:0, got:0, total:0, sec:0};
+  const H = getHass()||hass, t0 = P.t0 - 300; let got = 0;
+  for(const id of P.ids){ const s = H.states[id]; if(!s) continue;
+    const t = Date.parse(s.last_reported || s.last_updated || 0); if(t >= t0) got++; }
+  P.got = Math.max(P.got, got);
+  const el = Date.now() - P.t0, byVal = P.ids.length ? P.got / P.ids.length : 0, byTime = Math.min(el / P.timeout, 1);
+  return {pct: Math.min(99, Math.round(Math.max(byVal, byTime*0.97) * 100)), got:P.got, total:P.ids.length, sec:Math.round(el/1000)};
+}
+function progHtml(label){
+  const c = progCalc();
+  return `<div class="prog"><i id="progbar" style="width:${c.pct}%"></i></div>
+    <div class="progt"><span id="progtxt">${esc(label)} · ${c.got} von ${c.total} Werten gemeldet</span><span id="progpct">${c.pct} % · ${c.sec} s</span></div>`;
+}
+function progTick(){
+  const c = progCalc(), b = $('#progbar'), t = $('#progtxt'), q = $('#progpct');
+  if(b) b.style.width = c.pct+'%';
+  if(t) t.textContent = t.textContent.replace(/\d+ von \d+ Werten gemeldet/, `${c.got} von ${c.total} Werten gemeldet`);
+  if(q) q.textContent = `${c.pct} % · ${c.sec} s`;
+}
 async function runVerify(){
   const M = st.map, ents = ehsEntities(); if(!st.cat) return;
   const ids = [...new Set(curSet().map(f=>fnInfo(f, ents).r).filter(Boolean))];
-  M.verifying = true; render();
+  M.verifying = true; progStart(ids, ids.length>250 ? 90 : 25); render();
   try{ const r = await send({type:WS+'verify', entity_ids:ids, entry_id:st.sel||undefined, timeout: ids.length>250 ? 90 : 25});
        M.verify = {answered:new Set(r.answered), missing:new Set(r.missing), noKey:(r.no_key||[]).length, errors:r.errors||[], time:new Date().toLocaleTimeString('de-DE',{hour:'2-digit',minute:'2-digit'})}; }
   catch(e){ toast(errText(e)); }
-  M.verifying = false; render();
+  M.verifying = false; progStop(); render();
 }
 function mapBind(){
   const q = $('#mq'); if(q) q.addEventListener('input',()=>{ st.map.q=q.value; clearTimeout(mapBind._t); mapBind._t=setTimeout(()=>{ render(); const n=$('#mq'); if(n){ n.focus(); n.setSelectionRange(n.value.length,n.value.length); } },250); });
